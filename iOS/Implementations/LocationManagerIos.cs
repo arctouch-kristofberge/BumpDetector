@@ -27,10 +27,10 @@ namespace BumpDetector.iOS
 		public void RequestCurrentLocation ()
 		{
 			if (CLLocationManager.LocationServicesEnabled) {
-				manager.DesiredAccuracy = 1;
+				manager.DesiredAccuracy = 0;
 				manager.LocationsUpdated += LocationsUpdated;
 
-				manager.RequestLocation ();
+				manager.StartUpdatingLocation ();
 			} 
 			else 
 			{
@@ -39,20 +39,32 @@ namespace BumpDetector.iOS
 		}
 		#endregion
 
-
+		private int updatesReceived = 0;
 		
 		private void LocationsUpdated(object sender, CLLocationsUpdatedEventArgs e)
 		{
-			Unsubscribe ();
-			
-			if(OnLocationAcquired!=null)
-				OnLocationAcquired(this, e.ToMyLocation());
+			if (updatesReceived == 3)
+			{
+				Unsubscribe ();
+				CallEventHandler (e);
+			}
+			else
+			{
+				updatesReceived++;
+			}
 		}
 		
 		private void Unsubscribe ()
 		{
 			manager.LocationsUpdated -= LocationsUpdated;
 			manager.StopUpdatingLocation ();
+			updatesReceived = 0;
+		}
+
+		private void CallEventHandler (CLLocationsUpdatedEventArgs e)
+		{
+			if (OnLocationAcquired != null)
+				OnLocationAcquired (this, e.ToMyLocation ());
 		}
 	}
 }

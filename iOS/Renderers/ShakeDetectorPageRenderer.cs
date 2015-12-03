@@ -12,13 +12,7 @@ namespace BumpDetector.iOS
 {
 	public class ShakeDetectorPageRenderer : PageRenderer
 	{
-		private Action<BumpData> _callBack;
-
-		protected override void OnElementChanged (VisualElementChangedEventArgs e)
-		{
-			base.OnElementChanged (e);
-			_callBack = ((ShakeDetectorViewModel)((ShakeDetectorPage)e.NewElement).BindingContext).HandleBump;
-		}
+		public string Test { get; set; } = "blabla";
 
 		public override bool CanBecomeFirstResponder {
 			get
@@ -39,11 +33,6 @@ namespace BumpDetector.iOS
 			{
 				MessagingCenter.Send (this as object, "Bump");
 			}
-		}
-
-		private BumpData CreateBumpEventArguments(UIEvent evt)
-		{
-			return new BumpData () { Timestamp = evt.Timestamp };
 		}
 	}
 }

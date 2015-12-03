@@ -9,4 +9,3 @@ namespace BumpDetector
 		event EventHandler<BumpLocation> OnLocationAcquired;
 	}
 }
-
