@@ -1,35 +1,60 @@
-﻿using System;
-
-using Xamarin.Forms;
-using BumpDetector.View;
-
-namespace BumpDetector
+﻿namespace BumpDetector
 {
-	public class App : Application
-	{
-		public App ()
-		{
-			LocationManager = DependencyService.Get<ILocationManager> ();
-			// The root page of your application
-			MainPage = new NavigationPage( new ShakeDetectorPage ());
-		}
+    using System;
 
-		public ILocationManager LocationManager { get; set; }
+    using BumpDetector.View;
 
-		protected override void OnStart ()
-		{
-			// Handle when your app starts
-		}
+    using Xamarin.Forms;
 
-		protected override void OnSleep ()
-		{
-			// Handle when your app sleeps
-		}
+    public class App : Application
+    {
+        public static readonly SignalRClient SignalRClient = new SignalRClient("http://bumpdetector.azurewebsites.net/");
 
-		protected override void OnResume ()
-		{
-			// Handle when your app resumes
-		}
-	}
+        public App()
+        {
+            LocationManager = DependencyService.Get<ILocationManager>();
+            // The root page of your application
+            MainPage = new NavigationPage(new ShakeDetectorPage());
+        }
+
+        public ILocationManager LocationManager { get; set; }
+
+        protected override void OnStart()
+        {
+            App.SignalRClient.Start().ContinueWith(
+                task =>
+                {
+                    if (task.IsFaulted)
+                    {
+                        MainPage.DisplayAlert(
+                            "Error",
+                            "An error occurred when trying to connect to SignalR: " + task.Exception.InnerExceptions[0].Message,
+                            "OK");
+                    }
+                });
+
+            Device.StartTimer(
+                TimeSpan.FromSeconds(10),
+                () =>
+                {
+                    if (!App.SignalRClient.IsConnectedOrConnecting)
+                    {
+                        App.SignalRClient.Start();
+                    }
+
+                    return true;
+                });
+        }
+
+        protected override void OnSleep()
+        {
+            // Handle when your app sleeps
+        }
+
+        protected override void OnResume()
+        {
+            // Handle when your app resumes
+        }
+    }
 }
 
