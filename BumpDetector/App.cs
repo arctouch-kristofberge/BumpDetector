@@ -10,11 +10,13 @@ namespace BumpDetector
 		public App ()
 		{
 			LocationManager = DependencyService.Get<ILocationManager> ();
+			BumpListener = new BumpListener ();
 			// The root page of your application
-			MainPage = new NavigationPage( new ShakeDetectorPage ());
+            MainPage = new NavigationPage( new MainPage ());
 		}
 
 		public ILocationManager LocationManager { get; set; }
+		public BumpListener BumpListener { get; set; }
 
 		protected override void OnStart ()
 		{

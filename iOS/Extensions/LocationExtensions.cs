@@ -6,7 +6,7 @@ namespace BumpDetector.iOS.Extensions
 {
 	public static class LocationExtensions
 	{
-		public static BumpLocation ToMyLocation(this CLLocationsUpdatedEventArgs e)
+		public static BumpLocation ToBumpLocation(this CLLocationsUpdatedEventArgs e)
 		{
 			double lat = e.Locations [e.Locations.Length - 1].Coordinate.Latitude;
 			double lng = e.Locations [e.Locations.Length - 1].Coordinate.Longitude;

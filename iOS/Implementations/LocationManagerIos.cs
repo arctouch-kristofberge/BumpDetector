@@ -15,7 +15,7 @@ namespace BumpDetector.iOS
 		public LocationManagerIos ()
 		{
 			this.manager = new CLLocationManager();
-			manager.AllowsBackgroundLocationUpdates = true;
+//			manager.AllowsBackgroundLocationUpdates = true;
 
 			if (UIDevice.CurrentDevice.CheckSystemVersion (8, 0))
 				manager.RequestAlwaysAuthorization ();
@@ -27,7 +27,7 @@ namespace BumpDetector.iOS
 		public void RequestCurrentLocation ()
 		{
 			if (CLLocationManager.LocationServicesEnabled) {
-				manager.DesiredAccuracy = 0;
+				manager.DesiredAccuracy = 1;
 				manager.LocationsUpdated += LocationsUpdated;
 
 				manager.StartUpdatingLocation ();
@@ -64,7 +64,7 @@ namespace BumpDetector.iOS
 		private void CallEventHandler (CLLocationsUpdatedEventArgs e)
 		{
 			if (OnLocationAcquired != null)
-				OnLocationAcquired (this, e.ToMyLocation ());
+				OnLocationAcquired (this, e.ToBumpLocation ());
 		}
 	}
 }

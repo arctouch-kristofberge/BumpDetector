@@ -1,11 +1,12 @@
 ﻿using System;
-using Xamarin.Forms.Platform.iOS;
-using Xamarin.Forms;
 using BumpDetector;
-using UIKit;
-using BumpDetector.ViewModel;
 using BumpDetector.Model;
 using BumpDetector.View;
+using BumpDetector.ViewModel;
+using UIKit;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.iOS;
+using BumpDetector.Shared;
 
 [assembly: ExportRenderer(typeof(ShakeDetectorPage), typeof(BumpDetector.iOS.ShakeDetectorPageRenderer))]
 namespace BumpDetector.iOS
@@ -31,7 +32,7 @@ namespace BumpDetector.iOS
 		{
 			if (motion == UIEventSubtype.MotionShake)
 			{
-				MessagingCenter.Send (this as object, "Bump");
+				MessagingCenter.Send (this as object, Constants.BUMP_MESSAGE);
 			}
 		}
 	}

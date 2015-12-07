@@ -3,6 +3,7 @@ using Xamarin.Forms;
 using BumpDetector.Model;
 using PropertyChanged;
 using System.Collections.ObjectModel;
+using BumpDetector.Shared;
 
 namespace BumpDetector.ViewModel
 {
@@ -13,38 +14,37 @@ namespace BumpDetector.ViewModel
 		public string Time { get; set; }
 		public BumpLocation Location { get; set; }
 		 
-		private string _shakeStatusPhrase = "Shakes detected: ";
-		private string _timePhrase = "Timestamp: ";
-		private int _shakesDetected = 0;
+		private string shakeStatusPhrase = "Shakes detected: ";
+		private string timePhrase = "Timestamp: ";
+		private int bumpsDetected = 0;
 
 		public ShakeDetectorViewModel ()
 		{
 			UpdateShakeStatus();
 
-			MessagingCenter.Subscribe<object> (this, "Bump", HandleBump);
+            BumpListener.ClearAllListeners();
+            BumpListener.OnBump += HandleBump;
+            BumpListener.StartListeningForBumps();
 		}
 
-		public void HandleBump(object sender)
+        public void HandleBump(object sender, MyArgs e)
 		{
-			_shakesDetected++;
+            BumpListener.ClearAllListeners();
+            bumpsDetected++;
 			UpdateShakeStatus ();
 			UpdateTime ();
 			RequestCurrentLocation ();
+            BumpListener.OnBump += HandleBump;
 		}
 
 		private void UpdateShakeStatus()
 		{
-			ShakeStatus = _shakeStatusPhrase + _shakesDetected;
+			ShakeStatus = shakeStatusPhrase + bumpsDetected;
 		}
 
 		private void UpdateTime()
 		{
-			Time = _timePhrase + GetTimeSince1970 ();
-		}
-		
-		private double GetTimeSince1970 ()
-		{
-			return Math.Round (DateTime.Now.ToUniversalTime ().Subtract (new DateTime (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            Time = timePhrase + DateTime.Now.ToMiliSecondsSince1970();
 		}
 
 		private void RequestCurrentLocation()
