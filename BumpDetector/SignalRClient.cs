@@ -24,9 +24,15 @@
 
         public bool IsConnectedOrConnecting => this.connection.State != ConnectionState.Disconnected;
 
-        public void SendMessage(int id, double latitude, double longtitude, double altitude, double timestamp)
+        public void SendMessage(int id, double latitude, double longitude, double altitude, double timestamp)
         {
-            this.chatHubProxy.Invoke("NewBump", id, latitude, longtitude, altitude, timestamp);
+            try
+            {
+                this.chatHubProxy.Invoke("NewBump", id, latitude, longitude, altitude, timestamp);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public Task Start()

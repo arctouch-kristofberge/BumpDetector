@@ -48,7 +48,7 @@ namespace BumpDetector.ViewModel
             RequestCurrentLocation();
             if (App.SignalRClient.IsConnectedOrConnecting && Location != null)
             {
-                App.SignalRClient.SendMessage(Device.OnPlatform(1, 2, 3), Location.Latitude, Location.Longtitude, Location.Altitude, GetTimeSince1970());
+                App.SignalRClient.SendMessage(new Random().Next(), Location.Latitude, Location.Longtitude, Location.Altitude, GetTimeSince1970());
             }
         }
 
