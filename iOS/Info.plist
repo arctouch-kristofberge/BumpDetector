@@ -40,11 +40,11 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Resources/Images.xcassets/AppIcons.appiconset</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>New Entry</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
 	</array>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>New Entry</string>
 </dict>
 </plist>

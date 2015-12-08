@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="BumpDetector.View.BumpDetectorPage">
+	<ContentPage.Content>
+	  <StackLayout Padding="20">
+	    <Button Text="Start listening for bumps" Clicked="ButtonClicked"/>
+	    <Label Text="{Binding BumpsStatus}"/>
+	      <ScrollView>
+            <StackLayout x:Name="SpeedList"/>
+          </ScrollView>
+	  </StackLayout>
+	</ContentPage.Content>
+</ContentPage>

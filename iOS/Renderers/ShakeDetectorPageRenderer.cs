@@ -1,24 +1,19 @@
 ﻿using System;
-using Xamarin.Forms.Platform.iOS;
-using Xamarin.Forms;
 using BumpDetector;
-using UIKit;
-using BumpDetector.ViewModel;
 using BumpDetector.Model;
 using BumpDetector.View;
+using BumpDetector.ViewModel;
+using UIKit;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.iOS;
+using BumpDetector.Shared;
 
 [assembly: ExportRenderer(typeof(ShakeDetectorPage), typeof(BumpDetector.iOS.ShakeDetectorPageRenderer))]
 namespace BumpDetector.iOS
 {
 	public class ShakeDetectorPageRenderer : PageRenderer
 	{
-		private Action<BumpData> _callBack;
-
-		protected override void OnElementChanged (VisualElementChangedEventArgs e)
-		{
-			base.OnElementChanged (e);
-			_callBack = ((ShakeDetectorViewModel)((ShakeDetectorPage)e.NewElement).BindingContext).HandleBump;
-		}
+		public string Test { get; set; } = "blabla";
 
 		public override bool CanBecomeFirstResponder {
 			get
@@ -37,13 +32,8 @@ namespace BumpDetector.iOS
 		{
 			if (motion == UIEventSubtype.MotionShake)
 			{
-				MessagingCenter.Send (this as object, "Bump");
+				MessagingCenter.Send (this as object, Constants.BUMP_MESSAGE);
 			}
-		}
-
-		private BumpData CreateBumpEventArguments(UIEvent evt)
-		{
-			return new BumpData () { Timestamp = evt.Timestamp };
 		}
 	}
 }

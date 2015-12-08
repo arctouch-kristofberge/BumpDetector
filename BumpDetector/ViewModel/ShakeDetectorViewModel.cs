@@ -1,31 +1,46 @@
-﻿using System;
-
-using Xamarin.Forms;
-
-using BumpDetector.Model;
-
-using PropertyChanged;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ShakeDetectorViewModel.cs" company="ArcTouch, Inc.">
+//   All rights reserved.
+//   
+//   This file, its contents, concepts, methods, behavior, and operation
+//   (collectively the "Software") are protected by trade secret, patent,
+//   and copyright laws. The use of the Software is governed by a license
+//   agreement. Disclosure of the Software to third parties, in any form,
+//   in whole or in part, is expressly prohibited except as authorized by
+//   the license agreement.
+// </copyright>
+// <summary>
+//   Defines the ShakeDetectorViewModel type.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace BumpDetector.ViewModel
 {
+    using System;
     using System.Collections.ObjectModel;
-    using System.Dynamic;
+
+    using BumpDetector.Model;
+    using BumpDetector.Shared;
+
+    using PropertyChanged;
 
     [ImplementPropertyChanged]
     public class ShakeDetectorViewModel : BaseViewModel
     {
-        private string _shakeStatusPhrase = "Shakes detected: ";
+        private string shakeStatusPhrase = "Shakes detected: ";
 
-        private string _timePhrase = "Timestamp: ";
+        private string timePhrase = "Timestamp: ";
 
-        private int shakesDetected = 0;
+        private int bumpsDetected = 0;
 
         public ShakeDetectorViewModel()
         {
             UpdateShakeStatus();
+            BumpListener.ClearAllListeners();
+            BumpListener.OnBump += HandleBump;
+            BumpListener.StartListeningForBumps();
             this.Items = new ObservableCollection<string> { "Test: 12345" };
 
-            MessagingCenter.Subscribe<object>(this, "Bump", HandleBump);
             App.SignalRClient.OnBumpDetected += (username, message) =>
                 {
                     this.Items.Add($"{username} : {message}");
@@ -40,35 +55,28 @@ namespace BumpDetector.ViewModel
 
         public ObservableCollection<string> Items { get; set; }
 
-        public void HandleBump(object sender)
+        public void HandleBump(object sender, MyArgs e)
         {
-            this.shakesDetected++;
+            BumpListener.ClearAllListeners();
+            this.bumpsDetected++;
             UpdateShakeStatus();
             UpdateTime();
             RequestCurrentLocation();
+            BumpListener.OnBump += HandleBump;
             if (App.SignalRClient.IsConnectedOrConnecting && Location != null)
             {
-                App.SignalRClient.SendMessage(new Random().Next(), Location.Latitude, Location.Longtitude, Location.Altitude, GetTimeSince1970());
+                App.SignalRClient.SendMessage(new Random().Next(), Location.Latitude, Location.Longtitude, Location.Altitude, DateTime.Now.ToMiliSecondsSince1970());
             }
         }
 
         private void UpdateShakeStatus()
         {
-            ShakeStatus = this._shakeStatusPhrase + this.shakesDetected;
+            ShakeStatus = this.shakeStatusPhrase + this.bumpsDetected;
         }
 
         private void UpdateTime()
         {
-            Time = this._timePhrase + GetTimeSince1970();
-        }
-
-        private double GetTimeSince1970()
-        {
-            return
-                Math.Round(
-                    DateTime.Now.ToUniversalTime()
-                        .Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
-                        .TotalMilliseconds);
+            Time = this.timePhrase + DateTime.Now.ToMiliSecondsSince1970();
         }
 
         private void RequestCurrentLocation()

@@ -11,6 +11,14 @@ namespace BumpDetector
 		{
 			get { return ((App)Application.Current).LocationManager; }
 		}
+
+		protected BumpListener BumpListener
+		{
+			get
+			{
+				return ((App)Application.Current).BumpListener;
+			}
+		}
 	}
 }
 

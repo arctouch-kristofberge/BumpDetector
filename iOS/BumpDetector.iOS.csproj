@@ -110,6 +110,12 @@
     <Reference Include="PLCrashReporterUnifiedBinding">
       <HintPath>..\packages\Xamarin.Insights.1.11.2\lib\Xamarin.iOS10\PLCrashReporterUnifiedBinding.dll</HintPath>
     </Reference>
+    <Reference Include="DeviceMotion.Plugin.Abstractions">
+      <HintPath>..\packages\Xam.Plugin.DeviceMotion.1.0.3\lib\Xamarin.iOS10\DeviceMotion.Plugin.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="DeviceMotion.Plugin">
+      <HintPath>..\packages\Xam.Plugin.DeviceMotion.1.0.3\lib\Xamarin.iOS10\DeviceMotion.Plugin.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BumpDetector\BumpDetector.csproj">
