@@ -9,9 +9,6 @@ using BumpDetector.Model;
 
 using Android.Content;
 
-using System.Collections.Generic;
-using System.Linq;
-
 using BumpDetector.CustomExceptions;
 
 [assembly: Dependency(typeof(BumpDetector.Droid.LocationManagerAndroid))]
@@ -32,13 +29,14 @@ namespace BumpDetector.Droid
         {
             this.manager = (LocationManager)Android.App.Application.Context.GetSystemService(Context.LocationService);
 
-            var criteriaForLocationService = new Criteria { Accuracy = Accuracy.Fine };
+            var criteriaForLocationService = new Criteria { Accuracy = Accuracy.Fine, AltitudeRequired = true};
 
-            IList<string> acceptableLocationProviders = this.manager.GetProviders(criteriaForLocationService, true);
+            //IList<string> acceptableLocationProviders = this.manager.GetProviders(criteriaForLocationService, true);
+            string bestProvider = this.manager.GetBestProvider(criteriaForLocationService, true);
 
-            if (acceptableLocationProviders.Any())
+            if (!string.IsNullOrWhiteSpace(bestProvider))
             {
-                this.manager.RequestLocationUpdates(acceptableLocationProviders.First(), 0, 0, this);
+                this.manager.RequestLocationUpdates(bestProvider, 0, 0, this);
             }
             else
             {
