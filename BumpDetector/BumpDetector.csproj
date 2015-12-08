@@ -31,10 +31,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="View\ShakeDetectorPage.xaml.cs">
-      <DependentUpon>ShakeDetectorPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModel\ShakeDetectorViewModel.cs" />
     <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="Model\MyLocation.cs" />
     <Compile Include="Model\BumpData.cs" />
@@ -42,16 +38,20 @@
     <Compile Include="App.cs" />
     <Compile Include="Exceptions\LocationServiceNotRunningException.cs" />
     <Compile Include="Shared\Constants.cs" />
-    <Compile Include="View\BumpDetectorPage.xaml.cs">
-      <DependentUpon>BumpDetectorPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModel\BumpDetectorViewModel.cs" />
     <Compile Include="Listener\BumpListener.cs" />
     <Compile Include="Listener\MyArgs.cs" />
     <Compile Include="Shared\Extensions.cs" />
+    <Compile Include="View\BumpDetailsPage.xaml.cs">
+      <DependentUpon>BumpDetailsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\BumpDetailsViewModel.cs" />
+    <Compile Include="View\BumpWithInfoPage.xaml.cs">
+      <DependentUpon>BumpWithInfoPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\BumpWithInfoViewModel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
@@ -90,13 +90,13 @@
     <Folder Include="Listener\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="View\ShakeDetectorPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\BumpDetectorPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
     <EmbeddedResource Include="View\MainPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\BumpDetailsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\BumpWithInfoPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

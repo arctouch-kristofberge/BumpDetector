@@ -45,14 +45,6 @@ namespace BumpDetector
 			CrossDeviceMotion.Current.SensorValueChanged -= SensorValueChanged;
 		}
 
-        public void ClearAllListeners()
-        {
-            OnBump = null;
-            OnHighSpeedDetected = null;
-            OnSlowDownAfterHighSpeed = null;
-            OnFastSpeedEnded = null;
-        }
-
 		protected void SensorValueChanged (object sender, SensorValueChangedEventArgs e)
 		{
 			if(e.SensorType == MotionSensorType.Accelerometer)
@@ -156,7 +148,7 @@ namespace BumpDetector
 		{
             hasUpdatedLastValues = false;
 
-            if(OnFastSpeedEnded!=null && WasAtHighSpeed ())
+            if(OnFastSpeedEnded!=null)
                 OnFastSpeedEnded(this, new MyArgs(){Value = speed});
             AddPreviousMotion(MotionType.SLOW);
 		}

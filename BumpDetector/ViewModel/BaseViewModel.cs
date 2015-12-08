@@ -9,7 +9,10 @@ namespace BumpDetector
 	{
 		protected ILocationManager LocationManager
 		{
-			get { return ((App)Application.Current).LocationManager; }
+			get 
+            { 
+                return ((App)Application.Current).LocationManager; 
+            }
 		}
 
 		protected BumpListener BumpListener

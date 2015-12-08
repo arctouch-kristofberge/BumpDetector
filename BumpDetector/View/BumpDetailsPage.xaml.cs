@@ -7,18 +7,18 @@ using Xamarin.Forms;
 
 namespace BumpDetector.View
 {
-	public partial class BumpDetectorPage : ContentPage
+	public partial class BumpDetailsPage : ContentPage
 	{
-		public BumpDetectorPage ()
+		public BumpDetailsPage ()
 		{
 			InitializeComponent ();
 
-            BindingContext = new BumpDetectorViewModel(SpeedList);
+            BindingContext = new BumpDetailsViewModel(SpeedList);
 		}
 
 		private void ButtonClicked(object sender, EventArgs e)
 		{
-			((BumpDetectorViewModel)BindingContext).StartBumping ();
+			((BumpDetailsViewModel)BindingContext).StartBumping ();
 		}
 	}
 }

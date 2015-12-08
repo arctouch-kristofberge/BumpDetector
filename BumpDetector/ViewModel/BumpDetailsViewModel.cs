@@ -1,27 +1,23 @@
 ﻿using System;
 
-using Xamarin.Forms;
-using DeviceMotion.Plugin;
-using DeviceMotion.Plugin.Abstractions;
-using BumpDetector.Model;
 using PropertyChanged;
-using System.Windows.Input;
-using System.Collections.Generic;
+using Xamarin.Forms;
 
 namespace BumpDetector.ViewModel
 {
 	[ImplementPropertyChanged]
-	public class BumpDetectorViewModel : BaseViewModel
+	public class BumpDetailsViewModel : BaseViewModel
 	{
 		public string BumpsStatus { get; set; }
 
 		private int bumpsDetected = 0;
         private StackLayout SpeedList;
 
-        public BumpDetectorViewModel(StackLayout speedList)
+        public BumpDetailsViewModel(StackLayout speedList)
         {
             UpdateBumpsStatus ();
             this.SpeedList = speedList;
+
         }
 
 		public void StartBumping()

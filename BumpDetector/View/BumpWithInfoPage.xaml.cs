@@ -6,13 +6,13 @@ using BumpDetector.ViewModel;
 
 namespace BumpDetector.View
 {
-	public partial class ShakeDetectorPage : ContentPage
+	public partial class BumpWithInfoPage : ContentPage
 	{
-		public ShakeDetectorPage ()
+		public BumpWithInfoPage ()
 		{
 			InitializeComponent ();
 
-			BindingContext = new ShakeDetectorViewModel ();
+			BindingContext = new BumpWithInfoViewModel ();
 		}
 	}
 }

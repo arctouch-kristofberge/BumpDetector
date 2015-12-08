@@ -8,7 +8,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using BumpDetector.Shared;
 
-[assembly: ExportRenderer(typeof(ShakeDetectorPage), typeof(BumpDetector.iOS.ShakeDetectorPageRenderer))]
+[assembly: ExportRenderer(typeof(BumpWithInfoPage), typeof(BumpDetector.iOS.ShakeDetectorPageRenderer))]
 namespace BumpDetector.iOS
 {
 	public class ShakeDetectorPageRenderer : PageRenderer
