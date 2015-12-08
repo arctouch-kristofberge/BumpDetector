@@ -4,7 +4,7 @@
 			xmlns:View="clr-namespace:BumpDetector.View;assemby:BumpDetector"
 			x:Class="BumpDetector.View.MainPage">
 	<TabbedPage.Children>
-      <View:ShakeDetectorPage Title="Bumps with info"/>
-      <View:BumpDetectorPage Title="Just bumps"/>
+      <View:BumpWithInfoPage Title="Bumps with info"/>
+      <View:BumpDetailsPage Title="Just bumps"/>
 	</TabbedPage.Children>
 </TabbedPage>

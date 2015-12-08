@@ -7,10 +7,10 @@ namespace BumpDetector.Shared
 	{
 		public const string BUMP_MESSAGE = "BUMP";
 
-		public const int MINIMUM_DURATION_OF_MOTION = 250;
-		public static readonly double MOVEMENT_THRESHHOLD = Device.OnPlatform (150d, 200d, 200d);
-		public static readonly double STATIONARY_THRESHHOLD = Device.OnPlatform (30d, 30d, 30d);
-
+        public static readonly int MINIMUM_DURATION_OF_MOTION = Device.OnPlatform(50, 200, 200);
+		public static readonly double MOVEMENT_THRESHHOLD = Device.OnPlatform (120d, 190d, 200d);
+		public static readonly double STATIONARY_THRESHHOLD = Device.OnPlatform (20d, 30d, 30d);
+        public const double TIME_BETWEEN_BUMPS = 1000;
 	}
 }
 

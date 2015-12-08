@@ -36,8 +36,6 @@ namespace BumpDetector.Tests
 			double xyzValues = Constants.MOVEMENT_THRESHHOLD / 3 + 1;
 			return new MotionVector() { X = xyzValues, Y = xyzValues, Z = xyzValues };
 		}
-
-
 		#endregion
 	}
 }

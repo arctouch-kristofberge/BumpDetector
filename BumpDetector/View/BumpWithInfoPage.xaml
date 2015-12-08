@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="BumpDetector.View.ShakeDetectorPage">
+	<ContentPage.Content>
+	  <StackLayout Padding="20">
+	    <Label Text="{Binding ShakeStatus}" TextColor="Navy" FontSize="20"/>
+	    <Label Text="{Binding Time}" TextColor="Navy" Font="20"/>
+	    <StackLayout Orientation="Horizontal">
+	      <Label Text="Lat: "/>
+	      <Label Text="{Binding Location.Latitude}" TextColor="Navy" Font="20"/>
+	    </StackLayout>
+	    <StackLayout Orientation="Horizontal">
+	      <Label Text="Long:"/>
+	      <Label Text="{Binding Location.Longtitude}" TextColor="Navy" Font="20"/>
+	    </StackLayout>
+	    <StackLayout Orientation="Horizontal">
+	      <Label Text="Alt: "/>
+	      <Label Text="{Binding Location.Altitude}" TextColor="Navy" Font="20"/>
+	    </StackLayout>
+	  </StackLayout>
+	</ContentPage.Content>
+</ContentPage>

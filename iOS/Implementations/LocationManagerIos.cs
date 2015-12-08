@@ -39,7 +39,7 @@ namespace BumpDetector.iOS
 		}
 		#endregion
 
-		private int updatesReceived = 0;
+		private int updatesReceived;
 		
 		private void LocationsUpdated(object sender, CLLocationsUpdatedEventArgs e)
 		{
