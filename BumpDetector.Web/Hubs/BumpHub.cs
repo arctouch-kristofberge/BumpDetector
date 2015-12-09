@@ -2,50 +2,66 @@
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
-
     using Microsoft.AspNet.SignalR;
 
     public class BumpHub : Hub
     {
-        private static ConcurrentDictionary<int, BumpInfo> Bumps { get; } = new ConcurrentDictionary<int, BumpInfo>();
+        private static ConcurrentDictionary<long, BumpInfo> Bumps { get; } = new ConcurrentDictionary<long, BumpInfo>();
 
-        public async Task NewBump(int id, double latitude, double longitude, double altitude, double timestamp)
+        public void NewBump(int id, double latitude, double longitude, double altitude, double timestamp)
         {
-            int groupId = GetGroupIdBasedOn(latitude, longitude, altitude, timestamp);
+            try
+            {
+                Clients.All.Message("hello from the server");
 
-            string connectionId = Context.ConnectionId;
 
-            Bumps.TryAdd(
-                groupId,
-                new BumpInfo
+                string connectionId = Context.ConnectionId;
+
+                double latitudeRounded = Math.Round(latitude, 4);
+                double longitudeRounded = Math.Round(longitude, 4);
+                double altitudeRounded = Math.Round(altitude, 4);
+                double timestampRounded = Math.Round(timestamp, 4);
+
+                long groupId = GetGroupIdBasedOn(latitudeRounded, longitudeRounded, altitudeRounded, timestampRounded);
+
+                Bumps.TryAdd(
+                    groupId,
+                    new BumpInfo
                     {
                         Id = id,
-                        Latitude = latitude,
-                        Longitude = longitude,
-                        Altitude = altitude,
-                        Timestamp = timestamp,
+                        Latitude = latitudeRounded,
+                        Longitude = longitudeRounded,
+                        Altitude = altitudeRounded,
+                        Timestamp = timestampRounded,
                         ConnectionId = connectionId
                     });
 
-            await Groups.Add(connectionId, groupId.ToString());
+                Groups.Add(connectionId, groupId.ToString());
+                KeyValuePair<long, BumpInfo> kvp = Bumps.SingleOrDefault(b => b.Key == groupId && b.Value.ConnectionId != connectionId);
 
-            //await Clients.OthersInGroup(groupId.ToString()).BumpDetected($"Id: {id}", $"Lat: {latitude}\nLong: {longitude}\nAlt: {altitude}\nTimestamp: {timestamp}");
+                if (kvp.Equals(default(KeyValuePair<long, BumpInfo>)))
+                {
+                    return;
+                }
 
-            var otherClient = Bumps.Single(b => b.Key == groupId && b.Value.ConnectionId != connectionId).Value;
-
-            Task callerTask = Clients.Caller.BumpDetected($"Id: {otherClient.Id}", $"Lat: {latitude} - Long: {longitude} - Alt: {altitude} - Timestamp: {timestamp}");
-            //Task otherTask = Clients.Client(otherClient.ConnectionId).BumpDetected($"Id: {otherClient.Id}", $"Lat: {latitude}\nLong: {longitude}\nAlt: {altitude}\nTimestamp: {timestamp}");
-
-            //await Task.WhenAll(callerTask, otherTask);
-
-            await callerTask;
+                Clients.All.BumpDetected(
+                    $"Id: {kvp.Value.Id}",
+                    $"Lat: {latitude} - Long: {longitude} - Alt: {altitude} - Timestamp: {timestamp}");
+            }
+            catch (Exception e)
+            {
+                Clients.All.BumpDetected("Error", e.Message);
+            }
         }
 
-        private int GetGroupIdBasedOn(double latitude, double longitude, double altitude, double timestamp)
+        private long GetGroupIdBasedOn(double latitude, double longitude, double altitude, double timestamp)
         {
-            return Convert.ToInt32(Math.Round(latitude) + Math.Round(longitude) + Math.Round(altitude) + Math.Round(timestamp));
+            double sum = Math.Round((latitude + longitude + altitude + timestamp), 0);
+            long value;
+            long.TryParse(sum.ToString(), out value);
+            return value;
         }
     }
 

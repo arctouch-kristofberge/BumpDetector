@@ -5,6 +5,8 @@
 
     using Microsoft.AspNet.SignalR.Client;
 
+    using Xamarin.Forms;
+
     public class SignalRClient
     {
         private readonly HubConnection connection;
@@ -19,20 +21,18 @@
         {
             this.connection = new HubConnection(url);
             this.chatHubProxy = this.connection.CreateHubProxy("BumpHub");
-            this.chatHubProxy.On<string, string>(nameof(BumpDetected), (deviceId, message) => { OnBumpDetected?.Invoke(deviceId, message); });
+            this.chatHubProxy.On<string, string>("BumpDetected", (deviceId, message) => { OnBumpDetected?.Invoke(deviceId, message); });
+            this.chatHubProxy.On<string>("Message", message =>
+                {
+                    Application.Current.MainPage.DisplayAlert("Message", message, "Cancel");
+                });
         }
 
         public bool IsConnectedOrConnecting => this.connection.State != ConnectionState.Disconnected;
 
         public void SendMessage(int id, double latitude, double longitude, double altitude, double timestamp)
         {
-            try
-            {
-                this.chatHubProxy.Invoke("NewBump", id, latitude, longitude, altitude, timestamp);
-            }
-            catch (Exception)
-            {
-            }
+            this.chatHubProxy.Invoke("NewBump", id, latitude, longitude, altitude, timestamp);
         }
 
         public Task Start()

@@ -17,6 +17,7 @@
 namespace BumpDetector
 {
     using System;
+    using System.Diagnostics;
 
     using BumpDetector.View;
 
@@ -24,7 +25,11 @@ namespace BumpDetector
 
     public class App : Application
     {
-        public static readonly SignalRClient SignalRClient = new SignalRClient("http://bumpdetector.azurewebsites.net/");
+//#if DEBUG
+//        public static readonly SignalRClient SignalRClient = new SignalRClient("http://10.211.55.5:49842/");
+//#else
+        public static readonly SignalRClient SignalRClient = new SignalRClient("http://bumpdetector.azurewebsites.net");
+//#endif
 
         public App()
         {
@@ -63,6 +68,7 @@ namespace BumpDetector
 
                         return true;
                     });
+            App.SignalRClient.OnBumpDetected += (deviceId, message) => Debug.WriteLine($"{deviceId} - {message}");
         }
 
         protected override void OnSleep()

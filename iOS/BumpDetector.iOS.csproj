@@ -140,7 +140,7 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="Renderers\ShakeDetectorPageRenderer.cs" />
+    <Compile Include="Renderers\BumpWithInfoPageRenderer.cs" />
     <Compile Include="Implementations\LocationManagerIos.cs" />
     <Compile Include="Extensions\LocationExtensions.cs" />
   </ItemGroup>
