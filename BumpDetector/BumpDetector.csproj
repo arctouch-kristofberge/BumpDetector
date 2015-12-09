@@ -36,7 +36,6 @@
     <Compile Include="Model\BumpData.cs" />
     <Compile Include="Interface\ILocationManager.cs" />
     <Compile Include="App.cs" />
-    <Compile Include="Exceptions\LocationServiceNotRunningException.cs" />
     <Compile Include="Shared\Constants.cs" />
     <Compile Include="View\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -52,6 +51,8 @@
       <DependentUpon>BumpWithInfoPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\BumpWithInfoViewModel.cs" />
+    <Compile Include="Exceptions\LocationNotFoundException.cs" />
+    <Compile Include="Exceptions\LocationServiceNotAvailablleException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets')" />

@@ -40,7 +40,7 @@ namespace BumpDetector.ViewModel
 
         void SlowDownAfterHighSpeed (object sender, MyArgs e)
         {
-            SpeedList.Children.Add(new Label(){ Text = "Slow speed " + e.Value });
+            SpeedList.Children.Add(new Label(){ Text = "Slow down " + e.Value });
         }
 
 		private void UpdateBumpsStatus()

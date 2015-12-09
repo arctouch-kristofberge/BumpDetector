@@ -34,7 +34,7 @@ namespace BumpDetector.iOS
 			} 
 			else 
 			{
-				throw new LocationServiceNotRunningException ();
+				throw new LocationServiceNotAvailablleException ();
 			}
 		}
 		#endregion
@@ -43,15 +43,12 @@ namespace BumpDetector.iOS
 		
 		private void LocationsUpdated(object sender, CLLocationsUpdatedEventArgs e)
 		{
-			if (updatesReceived == 3)
-			{
-				Unsubscribe ();
-				CallEventHandler (e);
-			}
-			else
-			{
-				updatesReceived++;
-			}
+            updatesReceived++;
+            if (updatesReceived == 3)
+            {
+                Unsubscribe ();
+                CallEventHandler (e);
+            }
 		}
 		
 		private void Unsubscribe ()

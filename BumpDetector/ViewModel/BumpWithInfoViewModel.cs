@@ -76,9 +76,13 @@ namespace BumpDetector.ViewModel
                 LocationManager.OnLocationAcquired += LocationReceived;
                 LocationManager.RequestCurrentLocation ();
             } 
-            catch (LocationServiceNotRunningException) 
+            catch (LocationServiceNotAvailablleException) 
             {
                 BumpsStatus += " (location serive not running)";
+            }
+            catch (LocationNotFoundException)
+            {
+                BumpsStatus += "(location not found)";
             }
 		}
 
