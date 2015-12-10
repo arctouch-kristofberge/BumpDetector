@@ -53,6 +53,7 @@
     <Compile Include="ViewModel\BumpWithInfoViewModel.cs" />
     <Compile Include="Exceptions\LocationNotFoundException.cs" />
     <Compile Include="Exceptions\LocationServiceNotAvailablleException.cs" />
+    <Compile Include="Extensions\Extensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets')" />
@@ -89,6 +90,7 @@
     <Folder Include="Exceptions\" />
     <Folder Include="Shared\" />
     <Folder Include="Listener\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="View\MainPage.xaml">

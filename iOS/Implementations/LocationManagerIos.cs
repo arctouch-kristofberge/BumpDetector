@@ -9,34 +9,41 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(BumpDetector.iOS.LocationManagerIos))]
 namespace BumpDetector.iOS
 {
-	public class LocationManagerIos : ILocationManager
+    public class LocationManagerIos : ILocationManager
 	{
-		protected CLLocationManager manager;
-		public LocationManagerIos ()
-		{
-			this.manager = new CLLocationManager();
-//			manager.AllowsBackgroundLocationUpdates = true;
 
-			if (UIDevice.CurrentDevice.CheckSystemVersion (8, 0))
-				manager.RequestAlwaysAuthorization ();
-		}
+        protected CLLocationManager manager;
+        public LocationManagerIos ()
+        {
+            this.manager = new CLLocationManager();
+//          manager.AllowsBackgroundLocationUpdates = true;
 
-		#region ILocationManager implementation
-		public event EventHandler<BumpLocation> OnLocationAcquired;
-		
-		public void RequestCurrentLocation ()
-		{
-			if (CLLocationManager.LocationServicesEnabled) {
-				manager.DesiredAccuracy = 1;
-				manager.LocationsUpdated += LocationsUpdated;
+            if (UIDevice.CurrentDevice.CheckSystemVersion (8, 0))
+                manager.RequestAlwaysAuthorization ();
+        }
 
-				manager.StartUpdatingLocation ();
-			} 
-			else 
-			{
-				throw new LocationServiceNotAvailablleException ();
-			}
-		}
+        #region ILocationManager implementation
+        public event EventHandler<BumpLocation> OnLocationAcquired;
+        
+        public void RequestCurrentLocation ()
+        {
+            if (CLLocationManager.LocationServicesEnabled) {
+                manager.DesiredAccuracy = 1;
+                manager.LocationsUpdated += LocationsUpdated;
+
+                manager.StartUpdatingLocation ();
+            } 
+            else 
+            {
+                throw new LocationServiceNotAvailablleException ();
+            }
+        }
+
+        public void StopListening()
+        {
+            
+        }
+
 		#endregion
 
 		private int updatesReceived;

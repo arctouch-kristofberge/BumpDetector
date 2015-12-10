@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using BumpDetector.CustomExceptions;
 using System.Timers;
+using BumpDetector.Shared;
+using BumpDetector.Droid.Shared;
 
 [assembly: Dependency(typeof(BumpDetector.Droid.LocationManagerAndroid))]
 namespace BumpDetector.Droid
@@ -53,7 +55,7 @@ namespace BumpDetector.Droid
         void StartTimeOutTimer()
         {
             timeOutTimer = new Timer();
-            timeOutTimer.Interval = 2000;
+            timeOutTimer.Interval = AndroidConstants.LOCATION_PROVIDER_TIMEOUT;
             timeOutTimer.Elapsed += TimeOutReached;
             timeOutTimer.Start();
         }
@@ -61,14 +63,15 @@ namespace BumpDetector.Droid
         void TimeOutReached (object sender, ElapsedEventArgs e)
         {
             timeOutTimer.Stop();
+            timeOutTimer.Elapsed -= TimeOutReached;
             TryDifferentProvider();
         }
 
         void TryDifferentProvider()
         {
             
-            acceptableLocationProviders = manager.GetProviders(criteria, true);
-            acceptableLocationProviders.Remove(chosenProvider);
+            UpdateAcceptableProviders();
+            
             chosenProvider = acceptableLocationProviders.FirstOrDefault();
 
             try
@@ -81,10 +84,17 @@ namespace BumpDetector.Droid
             }
         }
 
+        void UpdateAcceptableProviders()
+        {
+            if(acceptableLocationProviders == null || acceptableLocationProviders.Count == 0)
+                acceptableLocationProviders = manager.GetProviders(criteria, true);
+            acceptableLocationProviders.Remove(chosenProvider);
+        }
+
         public void OnLocationChanged(Location location)
         {
+            manager.RemoveUpdates(this);
             timeOutTimer.Stop();
-            manager.RemoveUpdates (this);
             if(OnLocationAcquired != null)
                 OnLocationAcquired(this, new BumpLocation () { Latitude = location.Latitude, Longtitude = location.Longitude , Altitude = location.Altitude });
         }
@@ -102,6 +112,11 @@ namespace BumpDetector.Droid
         public void OnStatusChanged(string provider, Availability status, Android.OS.Bundle extras)
         {
             
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
         }
 	}
 }

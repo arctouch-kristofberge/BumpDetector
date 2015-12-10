@@ -3,6 +3,7 @@ using BumpDetector.Model;
 using BumpDetector.Shared;
 using PropertyChanged;
 using BumpDetector.CustomExceptions;
+using Xamarin.Forms;
 
 namespace BumpDetector.ViewModel
 {
@@ -73,8 +74,9 @@ namespace BumpDetector.ViewModel
 		{
 			try 
             {
-                LocationManager.OnLocationAcquired += LocationReceived;
-                LocationManager.RequestCurrentLocation ();
+                var locmgr = DependencyService.Get<ILocationManager>();
+                locmgr.OnLocationAcquired += LocationReceived;
+                locmgr.RequestCurrentLocation ();
             } 
             catch (LocationServiceNotAvailablleException) 
             {
@@ -88,7 +90,7 @@ namespace BumpDetector.ViewModel
 
 		private void LocationReceived(object sender, BumpLocation location)
 		{
-			LocationManager.OnLocationAcquired -= LocationReceived;
+            ((ILocationManager)sender).OnLocationAcquired -= LocationReceived;
 			Location = location;
 		}
 	}

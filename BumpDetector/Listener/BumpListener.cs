@@ -14,20 +14,22 @@ namespace BumpDetector
 		protected bool hasUpdatedLastValues = false;
 		protected DateTime lastUpdateTime;
 		protected DateTime currentTime;
-		protected double last_x;
-		protected double last_y;
-		protected double last_z;
+		protected double lastX;
+		protected double lastY;
+		protected double lastZ;
 		protected double speed;
+        protected double lastSpeed;
 
-        protected int numberOfValuesReceived = 0;
-        protected enum MotionType{ FAST, SLOW };
-        protected LinkedList<MotionType> PreviousMotions;
+        protected enum MotionType{ DEFAULT, FAST, SLOW };
+        protected List<MotionType> PreviousMotions;
         protected const int AMOUNT_OF_PREVIOUS_MOTIONS = 2;
+        bool movementDirection;
+        bool previousMovementDirection;
+
 
         public event EventHandler<MyArgs> OnBump;
         public event EventHandler<MyArgs> OnHighSpeedDetected;
         public event EventHandler<MyArgs> OnSlowDownAfterHighSpeed;
-        public event EventHandler<MyArgs> OnFastSpeedEnded;
 
 		public void StartListeningForBumps()
 		{
@@ -35,14 +37,8 @@ namespace BumpDetector
             {
                 CrossDeviceMotion.Current.Start(MotionSensorType.Accelerometer, MotionSensorDelay.Game);
                 CrossDeviceMotion.Current.SensorValueChanged += SensorValueChanged;
-                PreviousMotions = new LinkedList<MotionType>();
+                PreviousMotions = new List<MotionType>(AMOUNT_OF_PREVIOUS_MOTIONS);
             }
-		}
-
-		public void StopListeningForBumps()
-		{
-			CrossDeviceMotion.Current.Stop (MotionSensorType.Accelerometer);
-			CrossDeviceMotion.Current.SensorValueChanged -= SensorValueChanged;
 		}
 
 		protected void SensorValueChanged (object sender, SensorValueChangedEventArgs e)
@@ -56,7 +52,6 @@ namespace BumpDetector
 		protected void AccelerometerValueChanged(MotionVector motion)
 		{
 			currentTime = DateTime.Now;
-            numberOfValuesReceived++;
 			if(hasUpdatedLastValues)
 			{
 				AnalyzeMotion (motion);
@@ -69,10 +64,12 @@ namespace BumpDetector
 
 		protected void UpdateLastValues(MotionVector motion)
 		{
-			last_x = motion.X;
-			last_y = motion.Y;
-			last_z = motion.Z;
+			lastX = motion.X;
+			lastY = motion.Y;
+			lastZ = motion.Z;
 			lastUpdateTime = currentTime;
+            previousMovementDirection = movementDirection;
+            movementDirection = lastX + lastY + lastZ > 0;
 			hasUpdatedLastValues = true;
 		}
 
@@ -82,18 +79,7 @@ namespace BumpDetector
 			{
                 CalculateSpeed(motion);
 
-				if (speed > Constants.MOVEMENT_THRESHHOLD)
-				{
-					HighSpeedDetected ();
-				}
-				else if (WasAtHighSpeed())
-				{
-					DetectBump ();
-				}
-				else
-				{
-					LowSpeedDetected ();
-				}
+                DetectMotions();
 					
 				UpdateLastValues (motion);
 			}
@@ -107,72 +93,80 @@ namespace BumpDetector
         protected void CalculateSpeed(MotionVector motion)
         {
             double time = (currentTime - lastUpdateTime).TotalMilliseconds;
-            double distance = motion.X + motion.Y + motion.Z - last_x - last_y - last_z;
+            double distance = motion.X + motion.Y + motion.Z - lastX - lastY - lastZ;
+            lastSpeed = speed;
             speed = Math.Abs(distance) / time * 10000;
         }
 
-		protected void HighSpeedDetected()
+        protected void DetectMotions()
+        {
+            if(speed > Constants.HIGH_SPEED_THRESHHOLD)
+            {
+                RecordHighSpeed();
+            }
+            else if(PreviousMotionWasAtHighSpeed())
+            {
+                CheckIfBumpHappened();
+            }
+            else
+            {
+                EndMotion();
+            }
+        }
+
+		protected void RecordHighSpeed()
 		{
-            AddPreviousMotion(MotionType.FAST);
+            PreviousMotions.AddRespectingCapacity(MotionType.FAST);
 			if(OnHighSpeedDetected != null)
                 OnHighSpeedDetected(this, new MyArgs(){Value = speed});
 		}
 
-        protected virtual bool WasAtHighSpeed()
+        protected virtual bool PreviousMotionWasAtHighSpeed()
         {
             return PreviousMotions.FirstOrDefault () == MotionType.FAST;
         }
 
-		protected void DetectBump()
+		protected void CheckIfBumpHappened()
 		{
-            if(PreviousMotionsWereAll(MotionType.FAST))
+            if(PreviousMotionsWereAll(MotionType.FAST) && DidAbruptStop())
 			{
-                PreviousMotions.Clear();
-				hasUpdatedLastValues = false;
+                EndMotion();
 				LaunchBumpEvent ();
 			}
             else
             {
-                AddPreviousMotion(MotionType.SLOW);
                 if(OnSlowDownAfterHighSpeed != null)
-                    OnSlowDownAfterHighSpeed(this, new MyArgs(){Value = speed});
+                        OnSlowDownAfterHighSpeed(this, new MyArgs(){Value = speed});
+                PreviousMotions.AddRespectingCapacity(MotionType.SLOW);
             }
-		}
+        }
 
+        protected void EndMotion()
+        {
+            PreviousMotions.Clear();
+            hasUpdatedLastValues = false;
+        }
+        
+        protected void LaunchBumpEvent()
+        {
+            if (OnBump != null)
+                OnBump (this, new MyArgs(){Value = speed});
+        }
+        
         bool PreviousMotionsWereAll(MotionType motion, int numberOfValues = AMOUNT_OF_PREVIOUS_MOTIONS)
         {
             return PreviousMotions.Take(numberOfValues).Count(x => x == motion) == numberOfValues;
         }
-
-		protected void LowSpeedDetected()
-		{
-            hasUpdatedLastValues = false;
-
-            if(OnFastSpeedEnded!=null)
-                OnFastSpeedEnded(this, new MyArgs(){Value = speed});
-            AddPreviousMotion(MotionType.SLOW);
-		}
-
-		protected void LaunchBumpEvent()
-		{
-			if (OnBump != null)
-                OnBump (this, new MyArgs(){Value = speed});
-		}
-
-        protected virtual void AddPreviousMotion(MotionType motion)
+        
+        bool DidAbruptStop()
         {
-            if(PreviousMotions.Count >= AMOUNT_OF_PREVIOUS_MOTIONS)
-            {
-                PreviousMotions.RemoveLast();
-            }
-            PreviousMotions.AddFirst(motion);
-
+            return speed <= lastSpeed/3;
         }
-
-		protected BumpData CreateBumpData()
-		{
-			return new BumpData ();
-		} 
+        
+        bool IsMovingInOpositeDirection()
+        {
+            return movementDirection != previousMovementDirection;
+        }
 	}
 }
 
