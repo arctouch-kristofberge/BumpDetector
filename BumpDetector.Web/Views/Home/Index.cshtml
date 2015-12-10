@@ -17,10 +17,38 @@
 <div class="row">
     <div class="col-md-12">
         <h2>Device</h2>
-        <input type="text" readonly="readonly" disabled="disabled" id="device1" />
-        <input type="button" id="sendmessage" value="Send" />
-        <ul id="discussion"></ul>
+        <input type="text" readonly="readonly" disabled="disabled" id="device1"/>
     </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <div>
+            <label for="latitude">Latitude</label>
+            <input type="text" id="latitude" value="-27.5965"/>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div>
+            <label for="longitude">Longitude</label>
+            <input type="text" id="longitude" value="-48.5205"/>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div>
+            <label for="altitude">Altitude</label>
+            <input type="text" id="altitude" value="0"/>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div>
+            <label for="timestamp">Timestamp</label>
+            <input type="text" id="timestamp" value="0" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <input type="button" id="sendmessage" value="Send" />
+    <ul id="discussion"></ul>
 </div>
 @section scripts {
     <!--Script references. -->
@@ -45,7 +73,12 @@
             $.connection.hub.start().done(function () {
                 $('#sendmessage').click(function () {
                     // Call the Send method on the hub.
-                    chat.server.newBump($('#device1').val(), 2.5, 3.5, 4.5, 123456.7);
+                    chat.server.newBump(
+                        $('#device1').val(),
+                        $('#latitude').val(),
+                        $('#longitude').val(),
+                        $('#altitude').val(),
+                        $('#timestamp').val());
                     // Clear text box and reset focus for next comment.
                     //$('#message').val('').focus();
                 });

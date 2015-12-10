@@ -128,4 +128,3 @@ namespace BumpDetector.ViewModel
         }
     }
 }
-
