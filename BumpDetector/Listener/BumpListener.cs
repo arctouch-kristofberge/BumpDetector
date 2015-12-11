@@ -27,9 +27,9 @@ namespace BumpDetector
         bool previousMovementDirection;
 
 
-        public event EventHandler<MyArgs> OnBump;
-        public event EventHandler<MyArgs> OnHighSpeedDetected;
-        public event EventHandler<MyArgs> OnSlowDownAfterHighSpeed;
+        public event EventHandler<BumpEventArgs> OnBump;
+        public event EventHandler<BumpEventArgs> OnHighSpeedDetected;
+        public event EventHandler<BumpEventArgs> OnSlowDownAfterHighSpeed;
 
 		public void StartListeningForBumps()
 		{
@@ -118,7 +118,7 @@ namespace BumpDetector
 		{
             PreviousMotions.AddRespectingCapacity(MotionType.FAST);
 			if(OnHighSpeedDetected != null)
-                OnHighSpeedDetected(this, new MyArgs(){Value = speed});
+                OnHighSpeedDetected(this, new BumpEventArgs(){Value = speed});
 		}
 
         protected virtual bool PreviousMotionWasAtHighSpeed()
@@ -136,7 +136,7 @@ namespace BumpDetector
             else
             {
                 if(OnSlowDownAfterHighSpeed != null)
-                        OnSlowDownAfterHighSpeed(this, new MyArgs(){Value = speed});
+                        OnSlowDownAfterHighSpeed(this, new BumpEventArgs(){Value = speed});
                 PreviousMotions.AddRespectingCapacity(MotionType.SLOW);
             }
         }
@@ -150,7 +150,7 @@ namespace BumpDetector
         protected void LaunchBumpEvent()
         {
             if (OnBump != null)
-                OnBump (this, new MyArgs(){Value = speed});
+                OnBump (this, new BumpEventArgs(){Value = speed});
         }
         
         bool PreviousMotionsWereAll(MotionType motion, int numberOfValues = AMOUNT_OF_PREVIOUS_MOTIONS)

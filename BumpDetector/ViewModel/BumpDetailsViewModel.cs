@@ -22,7 +22,6 @@ namespace BumpDetector.ViewModel
         {
             UpdateBumpsStatus ();
             this.SpeedList = speedList;
-
         }
 
 		public void StartBumping()
@@ -36,12 +35,7 @@ namespace BumpDetector.ViewModel
 			BumpListener.StartListeningForBumps ();
 		}
 
-        void FastSpeedEnded (object sender, MyArgs e)
-        {
-            SpeedList.Children.Add(new Label(){ Text = "High speed end " + e.Value });
-        }
-
-        void SlowDownAfterHighSpeed (object sender, MyArgs e)
+        void SlowDownAfterHighSpeed (object sender, BumpEventArgs e)
         {
             SpeedList.Children.Add(new Label(){ Text = "Slow down " + e.Value });
         }
@@ -51,12 +45,12 @@ namespace BumpDetector.ViewModel
 			BumpsStatus = "Bumps detected: " + bumpsDetected;
 		}
 
-        void HighSpeedDetected (object sender, MyArgs e)
+        void HighSpeedDetected (object sender, BumpEventArgs e)
 		{
             SpeedList.Children.Add(new Label(){ Text = "High speed " + e.Value });
 		}
 
-        private void BumpDetected (object sender, MyArgs e)
+        private void BumpDetected (object sender, BumpEventArgs e)
 		{
             newBumpTimestamp = DateTime.Now.ToMiliSecondsSince1970();
             if(PreviousBumpHappenedLongEnoughAgo())
@@ -66,7 +60,6 @@ namespace BumpDetector.ViewModel
                 SpeedList.Children.Add(new Label(){ Text = "BUMP " + e.Value });
                 UpdateBumpsStatus ();
             }
-
 		}
 
         bool PreviousBumpHappenedLongEnoughAgo()

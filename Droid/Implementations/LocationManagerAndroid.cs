@@ -17,86 +17,79 @@ namespace BumpDetector.Droid
     public class LocationManagerAndroid : Activity, ILocationManager, ILocationListener
 	{
         protected LocationManager manager;
-        protected LocationProvider provider;
-        protected IList<string> acceptableLocationProviders;
-        protected Criteria criteria;
-        protected string chosenProvider;
-
         protected Timer timeOutTimer;
 
 		#region ILocationManager implementation
 
 		public event EventHandler<BumpLocation> OnLocationAcquired;
+        public event EventHandler<EventArgs> OnTimeOut;
 
-		public void RequestCurrentLocation ()
+        public void RequestCurrentLocation (double timeOut)
 		{
             manager = (LocationManager) Android.App.Application.Context.GetSystemService (Context.LocationService);
-            criteria = new Criteria { Accuracy = Accuracy.Fine };
-            chosenProvider = manager.GetBestProvider(criteria, true);
 
             StartListeningForLocationUpdates();
+            StartTimeOutTimer(timeOut);
 		}
-
-		#endregion
-
+        
         void StartListeningForLocationUpdates()
         {
-            if(!string.IsNullOrEmpty(chosenProvider))
+            if(manager.IsProviderEnabled(LocationManager.NetworkProvider))
             {
-                manager.RequestLocationUpdates(chosenProvider, 0, 0, this);
-                StartTimeOutTimer();
+                manager.RequestSingleUpdate(LocationManager.NetworkProvider, this, null);
+            }
+            else if(manager.IsProviderEnabled(LocationManager.GpsProvider))
+            {
+                manager.RequestSingleUpdate(LocationManager.GpsProvider, this, null);
             }
             else
             {
                 throw new LocationServiceNotAvailablleException();
             }
         }
-
-        void StartTimeOutTimer()
+        
+        void StartTimeOutTimer(double timeOut)
         {
-            timeOutTimer = new Timer();
-            timeOutTimer.Interval = AndroidConstants.LOCATION_PROVIDER_TIMEOUT;
+            timeOutTimer = new Timer(timeOut);
             timeOutTimer.Elapsed += TimeOutReached;
             timeOutTimer.Start();
         }
 
+        #endregion
+
         void TimeOutReached (object sender, ElapsedEventArgs e)
         {
+            StopUpdatesAndTimer();
+            if(OnTimeOut!=null)
+            {
+                OnTimeOut(this, new EventArgs());
+            }
+        }
+
+        void StopUpdatesAndTimer()
+        {
             timeOutTimer.Stop();
-            timeOutTimer.Elapsed -= TimeOutReached;
-            TryDifferentProvider();
+            manager.RemoveUpdates(this);
         }
 
-        void TryDifferentProvider()
-        {
-            
-            UpdateAcceptableProviders();
-            
-            chosenProvider = acceptableLocationProviders.FirstOrDefault();
-
-            try
-            {
-                StartListeningForLocationUpdates();
-            }
-            catch(LocationServiceNotAvailablleException)
-            {
-                throw new LocationNotFoundException();
-            }
-        }
-
-        void UpdateAcceptableProviders()
-        {
-            if(acceptableLocationProviders == null || acceptableLocationProviders.Count == 0)
-                acceptableLocationProviders = manager.GetProviders(criteria, true);
-            acceptableLocationProviders.Remove(chosenProvider);
-        }
+        #region ILocationListener Implementation
 
         public void OnLocationChanged(Location location)
         {
-            manager.RemoveUpdates(this);
-            timeOutTimer.Stop();
+            StopUpdatesAndTimer();
             if(OnLocationAcquired != null)
-                OnLocationAcquired(this, new BumpLocation () { Latitude = location.Latitude, Longtitude = location.Longitude , Altitude = location.Altitude });
+            {
+                OnLocationAcquired(this, CreateBumpLocation(location));
+            }
+        }
+
+        static BumpLocation CreateBumpLocation(Location location)
+        {
+            return location!=null ? new BumpLocation() {
+                Latitude = location.Latitude,
+                Longtitude = location.Longitude,
+                Altitude = location.Altitude }
+                : null;
         }
 
         public void OnProviderDisabled(string provider)
@@ -114,10 +107,7 @@ namespace BumpDetector.Droid
             
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-        }
+        #endregion
 	}
 }
 

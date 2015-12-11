@@ -41,7 +41,6 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Listener\BumpListener.cs" />
-    <Compile Include="Listener\MyArgs.cs" />
     <Compile Include="Shared\Extensions.cs" />
     <Compile Include="View\BumpDetailsPage.xaml.cs">
       <DependentUpon>BumpDetailsPage.xaml</DependentUpon>
@@ -54,6 +53,7 @@
     <Compile Include="Exceptions\LocationNotFoundException.cs" />
     <Compile Include="Exceptions\LocationServiceNotAvailablleException.cs" />
     <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="Listener\BumpEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets" Condition="Exists('..\packages\Fody.1.29.3\build\portable-net+sl+win+wpa+wp\Fody.targets')" />

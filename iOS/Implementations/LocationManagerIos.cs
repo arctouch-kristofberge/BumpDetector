@@ -11,7 +11,6 @@ namespace BumpDetector.iOS
 {
     public class LocationManagerIos : ILocationManager
 	{
-
         protected CLLocationManager manager;
         public LocationManagerIos ()
         {
@@ -24,8 +23,10 @@ namespace BumpDetector.iOS
 
         #region ILocationManager implementation
         public event EventHandler<BumpLocation> OnLocationAcquired;
+
+        public event EventHandler<EventArgs> OnTimeOut;
         
-        public void RequestCurrentLocation ()
+        public void RequestCurrentLocation (double timeOut)
         {
             if (CLLocationManager.LocationServicesEnabled) {
                 manager.DesiredAccuracy = 1;
@@ -37,11 +38,6 @@ namespace BumpDetector.iOS
             {
                 throw new LocationServiceNotAvailablleException ();
             }
-        }
-
-        public void StopListening()
-        {
-            
         }
 
 		#endregion
