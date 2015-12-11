@@ -1,15 +1,14 @@
 ﻿using System;
+using System.Timers;
 
 using Xamarin.Forms;
 
 using Android.App;
+using Android.Content;
 using Android.Locations;
 
-using BumpDetector.Model;
-
-using Android.Content;
-
 using BumpDetector.CustomExceptions;
+using BumpDetector.Model;
 
 [assembly: Dependency(typeof(BumpDetector.Droid.LocationManagerAndroid))]
 
@@ -17,62 +16,92 @@ namespace BumpDetector.Droid
 {
     public class LocationManagerAndroid : Activity, ILocationManager, ILocationListener
     {
-        protected LocationManager manager;
+        private LocationManager manager;
 
-        protected LocationProvider provider;
+        private Timer timeOutTimer;
 
         #region ILocationManager implementation
 
         public event EventHandler<BumpLocation> OnLocationAcquired;
 
-        public void RequestCurrentLocation()
+        public event EventHandler<EventArgs> OnTimeOut;
+
+        public void RequestCurrentLocation(double timeOut)
         {
             this.manager = (LocationManager)Android.App.Application.Context.GetSystemService(Context.LocationService);
 
-            var criteriaForLocationService = new Criteria { Accuracy = Accuracy.Fine, AltitudeRequired = true};
+            StartListeningForLocationUpdates();
+            StartTimeOutTimer(timeOut);
+        }
 
-            //IList<string> acceptableLocationProviders = this.manager.GetProviders(criteriaForLocationService, true);
-            string bestProvider = this.manager.GetBestProvider(criteriaForLocationService, true);
-
-            if (!string.IsNullOrWhiteSpace(bestProvider))
+        private void StartListeningForLocationUpdates()
+        {
+            if (this.manager.IsProviderEnabled(LocationManager.NetworkProvider))
             {
-                this.manager.RequestLocationUpdates(bestProvider, 0, 0, this);
+                this.manager.RequestSingleUpdate(LocationManager.NetworkProvider, this, null);
+            }
+            else if (this.manager.IsProviderEnabled(LocationManager.GpsProvider))
+            {
+                this.manager.RequestSingleUpdate(LocationManager.GpsProvider, this, null);
             }
             else
             {
-                throw new LocationServiceNotRunningException();
+                throw new LocationServiceNotAvailablleException();
             }
+        }
+
+        private void StartTimeOutTimer(double timeOut)
+        {
+            this.timeOutTimer = new Timer(timeOut);
+            this.timeOutTimer.Elapsed += TimeOutReached;
+            this.timeOutTimer.Start();
         }
 
         #endregion
 
+        private void TimeOutReached(object sender, ElapsedEventArgs e)
+        {
+            StopUpdatesAndTimer();
+            OnTimeOut?.Invoke(this, new EventArgs());
+        }
+
+        private void StopUpdatesAndTimer()
+        {
+            this.timeOutTimer.Stop();
+            this.manager.RemoveUpdates(this);
+        }
+
+        #region ILocationListener Implementation
+
         public void OnLocationChanged(Location location)
         {
-            this.manager.RemoveUpdates(this);
-            OnLocationAcquired?.Invoke(
-                this,
-                new BumpLocation
-                    {
-                        Latitude = location.Latitude,
-                        Longtitude = location.Longitude,
-                        Altitude = location.Altitude
-                    });
+            StopUpdatesAndTimer();
+            OnLocationAcquired?.Invoke(this, CreateBumpLocation(location));
+        }
+
+        private static BumpLocation CreateBumpLocation(Location location)
+        {
+            return location != null
+                       ? new BumpLocation {
+                                 Latitude = location.Latitude,
+                                 Longtitude = location.Longitude,
+                                 Altitude = location.Altitude
+                             }
+                       : null;
         }
 
         public void OnProviderDisabled(string provider)
         {
-            throw new NotImplementedException();
         }
 
         public void OnProviderEnabled(string provider)
         {
-            throw new NotImplementedException();
         }
 
         public void OnStatusChanged(string provider, Availability status, Android.OS.Bundle extras)
         {
-            throw new NotImplementedException();
         }
+
+        #endregion
     }
 }
-

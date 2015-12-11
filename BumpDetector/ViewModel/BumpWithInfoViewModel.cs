@@ -1,29 +1,17 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="BumpWithInfoViewModel.cs" company="ArcTouch, Inc.">
-//   All rights reserved.
-//   
-//   This file, its contents, concepts, methods, behavior, and operation
-//   (collectively the "Software") are protected by trade secret, patent,
-//   and copyright laws. The use of the Software is governed by a license
-//   agreement. Disclosure of the Software to third parties, in any form,
-//   in whole or in part, is expressly prohibited except as authorized by
-//   the license agreement.
-// </copyright>
-// <summary>
-//   Defines the BumpWithInfoViewModel type.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+﻿using System;
+
+using BumpDetector.Model;
+using BumpDetector.Shared;
+
+using PropertyChanged;
+
+using BumpDetector.CustomExceptions;
+
+using Xamarin.Forms;
 
 namespace BumpDetector.ViewModel
 {
-    using System;
     using System.Collections.ObjectModel;
-
-    using BumpDetector.CustomExceptions;
-    using BumpDetector.Model;
-    using BumpDetector.Shared;
-
-    using PropertyChanged;
 
     [ImplementPropertyChanged]
     public class BumpWithInfoViewModel : BaseViewModel
@@ -48,10 +36,7 @@ namespace BumpDetector.ViewModel
             BumpListener.OnBump -= HandleBump;
             BumpListener.OnBump += HandleBump;
             BumpListener.StartListeningForBumps();
-            App.SignalRClient.OnBumpDetected += (id, message) =>
-                {
-                    Items.Add($"{id} - {message}");
-                };
+            App.SignalRClient.OnBumpDetected += (id, message) => { Items.Add($"{id} - {message}"); };
         }
 
         public string BumpsStatus { get; set; }
@@ -66,7 +51,7 @@ namespace BumpDetector.ViewModel
 
         public ObservableCollection<string> Items { get; set; } = new ObservableCollection<string> { "This is a test" };
 
-        public void HandleBump(object sender, MyArgs e)
+        public void HandleBump(object sender, BumpEventArgs e)
         {
             this.newBumpTimestamp = DateTime.Now.ToMiliSecondsSince1970();
             if (PreviousBumpHappenedLongEnoughAgo())
@@ -78,7 +63,12 @@ namespace BumpDetector.ViewModel
                 RequestCurrentLocation();
                 if (App.SignalRClient.IsConnectedOrConnecting && Location != null)
                 {
-                    App.SignalRClient.SendMessage(Id, Location.Latitude, Location.Longtitude, Location.Altitude, this.newBumpTimestamp);
+                    App.SignalRClient.SendMessage(
+                        Id,
+                        Location.Latitude,
+                        Location.Longtitude,
+                        Location.Altitude,
+                        this.newBumpTimestamp);
                 }
             }
             else
@@ -112,19 +102,33 @@ namespace BumpDetector.ViewModel
         {
             try
             {
-                LocationManager.OnLocationAcquired += LocationReceived;
-                LocationManager.RequestCurrentLocation();
+                ILocationManager locmgr = DependencyService.Get<ILocationManager>();
+                locmgr.OnLocationAcquired += ShowLocation;
+                locmgr.OnTimeOut += ShowTimeOutMessage;
+                locmgr.RequestCurrentLocation(Constants.LOCATION_PROVIDER_TIMEOUT);
             }
-            catch (LocationServiceNotRunningException)
+            catch (LocationServiceNotAvailablleException)
             {
                 BumpsStatus += " (location service is not running)";
             }
         }
 
-        private void LocationReceived(object sender, BumpLocation location)
+        private void ShowTimeOutMessage(object sender, EventArgs e)
         {
-            LocationManager.OnLocationAcquired -= LocationReceived;
-            Location = location;
+            BumpsStatus += " (location not found)";
+        }
+
+        private void ShowLocation(object sender, BumpLocation location)
+        {
+            ((ILocationManager)sender).OnLocationAcquired -= ShowLocation;
+            if (location != null)
+            {
+                this.Location = location;
+            }
+            else
+            {
+                BumpsStatus += " (location not found)";
+            }
         }
     }
 }

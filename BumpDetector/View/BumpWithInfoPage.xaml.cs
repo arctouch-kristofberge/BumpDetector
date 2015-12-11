@@ -1,16 +1,19 @@
-﻿namespace BumpDetector.View
+﻿using System;
+using System.Collections.Generic;
+
+using Xamarin.Forms;
+using BumpDetector.ViewModel;
+using Xamarin.Forms.Xaml;
+
+namespace BumpDetector.View
 {
-    using BumpDetector.ViewModel;
+	public partial class BumpWithInfoPage : ContentPage
+	{
+		public BumpWithInfoPage ()
+		{
+			InitializeComponent ();
 
-    using Xamarin.Forms;
-
-    public partial class BumpWithInfoPage : ContentPage
-    {
-        public BumpWithInfoPage()
-        {
-            InitializeComponent();
-
-            BindingContext = new BumpWithInfoViewModel();
-        }
-    }
+			BindingContext = new BumpWithInfoViewModel ();
+		}
+	}
 }

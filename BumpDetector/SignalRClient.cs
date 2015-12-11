@@ -39,7 +39,14 @@
 
         public void SendMessage(int id, double latitude, double longitude, double altitude, double timestamp)
         {
-            this.chatHubProxy.Invoke("NewBump", id, latitude, longitude, altitude, timestamp);
+            try
+            {
+                this.chatHubProxy.Invoke("NewBump", id, latitude, longitude, altitude, timestamp);
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         public Task Start()
