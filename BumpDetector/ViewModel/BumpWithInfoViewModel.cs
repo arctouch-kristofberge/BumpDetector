@@ -50,7 +50,7 @@ namespace BumpDetector.ViewModel
             BumpListener.StartListeningForBumps();
             App.SignalRClient.OnBumpDetected += (id, message) =>
                 {
-                    Items.Add($"Matched with ID: {id} - {message}");
+                    Items.Add($"{id} - {message}");
                 };
         }
 

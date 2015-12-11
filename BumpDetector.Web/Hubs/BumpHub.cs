@@ -9,6 +9,8 @@
 
     public class BumpHub : Hub
     {
+        const double ACCEPTABLE_RANGE_IN_METERS = 20d;
+
         public void NewBump(int id, double latitude, double longitude, double altitude, double timestamp)
         {
             try
@@ -24,22 +26,33 @@
                                         Longitude = longitude,
                                         Altitude = altitude,
                                         Timestamp = timestamp,
-                                        ConnectionId = connectionId
+                                        ConnectionId = connectionId,
+                                        ArrivedAt = utcNow
                                     };
 
                 BumpStorage.AllBumps.TryAdd(serverTimestamp, currentBumpInfo);
 
                 GeoCoordinate thisGeoCoordinate = new GeoCoordinate(latitude, longitude);
 
+                Clients.All.Log($"# Device id: {id} - arrived at {utcNow.ToString("R")}");
+                Clients.All.Log($"Latitude: {latitude}");
+                Clients.All.Log($"Longitude: {longitude}");
+                Clients.All.Log($"Altitude: {altitude}");
+                Clients.All.Log($"Timestamp on device: {timestamp}");
+                Clients.All.Log($"ConnectionId on server: {connectionId}");
+
                 foreach (BumpInfo bumpInfo in BumpStorage.AllBumps.Where(b => b.Key == serverTimestamp &&
                                                                                 (b.Value != null && b.Value.Id != id)).Select(c => c.Value))
                 {
-                    double acceptableRangeInMeters = 5d;
+                    GeoCoordinate otherGeoCoordinate = new GeoCoordinate(bumpInfo.Latitude, bumpInfo.Longitude);
 
-                    if (thisGeoCoordinate.GetDistanceTo(new GeoCoordinate(bumpInfo.Latitude, bumpInfo.Longitude)) < acceptableRangeInMeters)
+                    bool areDevicesNear = thisGeoCoordinate.GetDistanceTo(otherGeoCoordinate) < ACCEPTABLE_RANGE_IN_METERS;
+                    var absTimeDiff = Math.Abs((TimeSpan.FromTicks(currentBumpInfo.ArrivedAt.Ticks) - TimeSpan.FromTicks(bumpInfo.ArrivedAt.Ticks)).Ticks);
+                    bool haveBumpedAtSameTime = TimeSpan.FromTicks(absTimeDiff).TotalMinutes < 2;
+
+                    if (areDevicesNear && haveBumpedAtSameTime)
                     {
                         // TODO take altitude into account
-                        // TODO take timestamp interval into account
 
                         Clients.Caller.BumpDetected(
                             $"Matched with Id: {bumpInfo.Id}",
@@ -49,10 +62,9 @@
                             $"Matched with Id: {id}",
                             $"Lat: {bumpInfo.Latitude} - Long: {bumpInfo.Longitude} - Alt: {bumpInfo.Altitude} - Timestamp: {bumpInfo.Timestamp}");
 
-                        var a = currentBumpInfo.Clone();
-                        var b = bumpInfo.Clone();
-                        BumpStorage.AllBumps.TryRemove(serverTimestamp, out a);
-                        BumpStorage.AllBumps.TryRemove(serverTimestamp, out b);
+                        Clients.All.Log($"# MATCHED device {id} with {bumpInfo.Id}");
+
+                        TryRemoveUsedBumps(serverTimestamp, currentBumpInfo, bumpInfo);
                         return;
                     }
                 }
@@ -60,6 +72,15 @@
             catch (Exception e)
             {
                 Clients.All.BumpDetected("Error", e.Message);
+            }
+        }
+
+        private static void TryRemoveUsedBumps(long key, params BumpInfo[] bumpInfos)
+        {
+            foreach (BumpInfo bumpInfo in bumpInfos)
+            {
+                BumpInfo bumpInfoClone = bumpInfo.Clone();
+                BumpStorage.AllBumps.TryRemove(key, out bumpInfoClone);
             }
         }
     }
@@ -91,6 +112,8 @@
 
         public string ConnectionId { get; set; }
 
+        public DateTime ArrivedAt { get; set; }
+
         public BumpInfo Clone()
         {
             return new BumpInfo
@@ -100,7 +123,8 @@
                            Longitude = Longitude,
                            Altitude = Altitude,
                            Timestamp = Timestamp,
-                           ConnectionId = ConnectionId
+                           ConnectionId = ConnectionId,
+                           ArrivedAt = ArrivedAt
                        };
         }
     }

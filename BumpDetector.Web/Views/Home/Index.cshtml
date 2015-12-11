@@ -17,9 +17,10 @@
 <div class="row">
     <div class="col-md-12">
         <h2>Device</h2>
-        <input type="text" readonly="readonly" disabled="disabled" id="device1"/>
+        <input type="text" readonly="readonly" disabled="disabled" id="device"/>
     </div>
 </div>
+<br/>
 <div class="row">
     <div class="col-md-3">
         <div>
@@ -47,8 +48,12 @@
     </div>
 </div>
 <div class="row">
-    <input type="button" id="sendmessage" value="Send" />
+    <input type="button" id="sendmessage" value="Send"/>
     <ul id="discussion"></ul>
+</div>
+<div class="jumbotron">
+    <h4>Log</h4>
+    <div id="log"></div>
 </div>
 @section scripts {
     <!--Script references. -->
@@ -65,22 +70,28 @@
             // Create a function that the hub can call back to display messages.
             chat.client.bumpDetected = function (deviceId, message) {
                 // Add the message to the page.
-                $('#discussion').append('<li><strong>Bumped with device: ' + htmlEncode(deviceId) + '</strong>: ' + htmlEncode(message) + '</li>');
+                $('#discussion').append('<li><strong>' + htmlEncode(deviceId) + '</strong>: ' + htmlEncode(message) + '</li>');
+            };
+
+            chat.client.log = function (message) {
+                if (message.toLowerCase().indexOf("# ") !== -1) {
+                    $('#log').append('<p style="font-size:0.7em;"><strong>' + htmlEncode(message) + '</strong></p>');
+                } else {
+                    $('#log').append('<p style="font-size:0.7em;">' + htmlEncode(message) + '</p>');
+                }
             };
             // Get the user name and store it to prepend to messages.
-            $('#device1').val(prompt('Enter an id for Device 1:', 1));
+            $('#device').val(prompt('Enter an id for the device:', 1));
             // Start the connection.
             $.connection.hub.start().done(function () {
                 $('#sendmessage').click(function () {
                     // Call the Send method on the hub.
                     chat.server.newBump(
-                        $('#device1').val(),
+                        $('#device').val(),
                         $('#latitude').val(),
                         $('#longitude').val(),
                         $('#altitude').val(),
                         $('#timestamp').val());
-                    // Clear text box and reset focus for next comment.
-                    //$('#message').val('').focus();
                 });
             });
         });
