@@ -9,7 +9,8 @@
 
     public class BumpHub : Hub
     {
-        const double ACCEPTABLE_RANGE_IN_METERS = 20d;
+        const double RANGE_IN_METERS = 20d;
+        private const int TIME_RANGE_IN_MINS = 1;
 
         public void NewBump(int id, double latitude, double longitude, double altitude, double timestamp)
         {
@@ -46,9 +47,10 @@
                 {
                     GeoCoordinate otherGeoCoordinate = new GeoCoordinate(bumpInfo.Latitude, bumpInfo.Longitude);
 
-                    bool areDevicesNear = thisGeoCoordinate.GetDistanceTo(otherGeoCoordinate) < ACCEPTABLE_RANGE_IN_METERS;
+                    double distance = thisGeoCoordinate.GetDistanceTo(otherGeoCoordinate);
+                    bool areDevicesNear = distance < RANGE_IN_METERS;
                     var absTimeDiff = Math.Abs((TimeSpan.FromTicks(currentBumpInfo.ArrivedAt.Ticks) - TimeSpan.FromTicks(bumpInfo.ArrivedAt.Ticks)).Ticks);
-                    bool haveBumpedAtSameTime = TimeSpan.FromTicks(absTimeDiff).TotalMinutes < 2;
+                    bool haveBumpedAtSameTime = TimeSpan.FromTicks(absTimeDiff).TotalMinutes < TIME_RANGE_IN_MINS;
 
                     if (areDevicesNear && haveBumpedAtSameTime)
                     {
@@ -66,6 +68,10 @@
 
                         TryRemoveUsedBumps(serverTimestamp, currentBumpInfo, bumpInfo);
                         return;
+                    }
+                    else if(haveBumpedAtSameTime && !areDevicesNear)
+                    {
+                        Clients.All.Log($"# Did not match device {id} with {bumpInfo.Id} because they are {distance.ToString("0.##m")} distant.");
                     }
                 }
             }
