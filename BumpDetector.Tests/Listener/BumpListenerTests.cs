@@ -33,7 +33,7 @@ namespace BumpDetector.Tests
 		#region Helpers
 		private MotionVector GetHighSpeedMotion()
 		{
-			double xyzValues = Constants.MOVEMENT_THRESHHOLD / 3 + 1;
+			double xyzValues = Constants.HIGH_SPEED_THRESHHOLD / 3 + 1;
 			return new MotionVector() { X = xyzValues, Y = xyzValues, Z = xyzValues };
 		}
 		#endregion

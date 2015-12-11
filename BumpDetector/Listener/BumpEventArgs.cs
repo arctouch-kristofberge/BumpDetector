@@ -2,7 +2,7 @@
 
 namespace BumpDetector
 {
-    public class MyArgs : EventArgs
+    public class BumpEventArgs : EventArgs
     {
         public double Value { get; set; }
     }

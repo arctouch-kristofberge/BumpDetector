@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Xamarin.Forms;
 using BumpDetector.ViewModel;
+using Xamarin.Forms.Xaml;
 
 namespace BumpDetector.View
 {

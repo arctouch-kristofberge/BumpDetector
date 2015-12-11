@@ -2,6 +2,7 @@
 
 using PropertyChanged;
 using Xamarin.Forms;
+using BumpDetector.Shared;
 
 namespace BumpDetector.ViewModel
 {
@@ -13,11 +14,14 @@ namespace BumpDetector.ViewModel
 		private int bumpsDetected = 0;
         private StackLayout SpeedList;
 
+
+        private double newBumpTimestamp;
+        private double previousBumpTimestamp;
+
         public BumpDetailsViewModel(StackLayout speedList)
         {
             UpdateBumpsStatus ();
             this.SpeedList = speedList;
-
         }
 
 		public void StartBumping()
@@ -28,19 +32,12 @@ namespace BumpDetector.ViewModel
             BumpListener.OnHighSpeedDetected += HighSpeedDetected;
             BumpListener.OnSlowDownAfterHighSpeed -= SlowDownAfterHighSpeed;
             BumpListener.OnSlowDownAfterHighSpeed += SlowDownAfterHighSpeed;
-            BumpListener.OnFastSpeedEnded -= FastSpeedEnded;
-            BumpListener.OnFastSpeedEnded += FastSpeedEnded;
 			BumpListener.StartListeningForBumps ();
 		}
 
-        void FastSpeedEnded (object sender, MyArgs e)
+        void SlowDownAfterHighSpeed (object sender, BumpEventArgs e)
         {
-            SpeedList.Children.Add(new Label(){ Text = "High speed end " + e.Value });
-        }
-
-        void SlowDownAfterHighSpeed (object sender, MyArgs e)
-        {
-            SpeedList.Children.Add(new Label(){ Text = "Slow speed " + e.Value });
+            SpeedList.Children.Add(new Label(){ Text = "Slow down " + e.Value });
         }
 
 		private void UpdateBumpsStatus()
@@ -48,16 +45,26 @@ namespace BumpDetector.ViewModel
 			BumpsStatus = "Bumps detected: " + bumpsDetected;
 		}
 
-        void HighSpeedDetected (object sender, MyArgs e)
+        void HighSpeedDetected (object sender, BumpEventArgs e)
 		{
             SpeedList.Children.Add(new Label(){ Text = "High speed " + e.Value });
 		}
 
-        private void BumpDetected (object sender, MyArgs e)
+        private void BumpDetected (object sender, BumpEventArgs e)
 		{
-			bumpsDetected++;
-            SpeedList.Children.Add(new Label(){ Text = "BUMP " + e.Value });
-			UpdateBumpsStatus ();
+            newBumpTimestamp = DateTime.Now.ToMiliSecondsSince1970();
+            if(PreviousBumpHappenedLongEnoughAgo())
+            {
+                previousBumpTimestamp = newBumpTimestamp;
+                bumpsDetected++;
+                SpeedList.Children.Add(new Label(){ Text = "BUMP " + e.Value });
+                UpdateBumpsStatus ();
+            }
 		}
+
+        bool PreviousBumpHappenedLongEnoughAgo()
+        {
+            return newBumpTimestamp - previousBumpTimestamp > Constants.TIME_BETWEEN_BUMPS;
+        }
 	}
 }

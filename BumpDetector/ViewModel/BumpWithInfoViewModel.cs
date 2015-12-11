@@ -3,6 +3,7 @@ using BumpDetector.Model;
 using BumpDetector.Shared;
 using PropertyChanged;
 using BumpDetector.CustomExceptions;
+using Xamarin.Forms;
 
 namespace BumpDetector.ViewModel
 {
@@ -31,7 +32,7 @@ namespace BumpDetector.ViewModel
             BumpListener.StartListeningForBumps();
 		}
 
-        public void HandleBump(object sender, MyArgs e)
+        public void HandleBump(object sender, BumpEventArgs e)
 		{
             newBumpTimestamp = DateTime.Now.ToMiliSecondsSince1970();
             if(PreviousBumpHappenedLongEnoughAgo())
@@ -73,19 +74,33 @@ namespace BumpDetector.ViewModel
 		{
 			try 
             {
-                LocationManager.OnLocationAcquired += LocationReceived;
-                LocationManager.RequestCurrentLocation ();
+                var locmgr = DependencyService.Get<ILocationManager>();
+                locmgr.OnLocationAcquired += ShowLocation;
+                locmgr.OnTimeOut += ShowTimeOutMessage;
+                locmgr.RequestCurrentLocation (Constants.LOCATION_PROVIDER_TIMEOUT);
             } 
-            catch (LocationServiceNotRunningException) 
+            catch (LocationServiceNotAvailablleException) 
             {
                 BumpsStatus += " (location serive not running)";
             }
 		}
 
-		private void LocationReceived(object sender, BumpLocation location)
+        void ShowTimeOutMessage (object sender, EventArgs e)
+        {
+            BumpsStatus += " (location not found)";
+        }
+
+		private void ShowLocation(object sender, BumpLocation location)
 		{
-			LocationManager.OnLocationAcquired -= LocationReceived;
-			Location = location;
+            ((ILocationManager)sender).OnLocationAcquired -= ShowLocation;
+            if(location!=null)
+            {
+                this.Location = location;
+            }
+            else
+            {
+                BumpsStatus += " (location not found)";
+            }
 		}
 	}
 }
