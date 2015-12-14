@@ -1,110 +1,130 @@
 ﻿using System;
+
 using DeviceMotion.Plugin;
 using DeviceMotion.Plugin.Abstractions;
-using BumpDetector.Model;
-using Xamarin.Forms;
+
 using System.Collections.Generic;
 using System.Linq;
+
 using BumpDetector.Shared;
 
 namespace BumpDetector
 {
-	public class BumpListener
-	{
-		protected bool hasUpdatedLastValues = false;
-		protected DateTime lastUpdateTime;
-		protected DateTime currentTime;
-		protected double lastX;
-		protected double lastY;
-		protected double lastZ;
-		protected double speed;
-        protected double lastSpeed;
+    public class BumpListener
+    {
+        private bool hasUpdatedLastValues = false;
 
-        protected enum MotionType{ DEFAULT, FAST, SLOW };
-        protected List<MotionType> PreviousMotions;
-        protected const int AMOUNT_OF_PREVIOUS_MOTIONS = 2;
-        bool movementDirection;
-        bool previousMovementDirection;
+        private DateTime lastUpdateTime;
 
+        private DateTime currentTime;
+
+        private double lastX;
+
+        private double lastY;
+
+        private double lastZ;
+
+        private double speed;
+
+        private double lastSpeed;
+
+        protected enum MotionType
+        {
+            DEFAULT,
+
+            FAST,
+
+            SLOW
+        };
+
+        private List<MotionType> previousMotions;
+
+        private const int AMOUNT_OF_PREVIOUS_MOTIONS = 2;
+
+        private bool movementDirection;
+
+        private bool previousMovementDirection;
 
         public event EventHandler<BumpEventArgs> OnBump;
+
         public event EventHandler<BumpEventArgs> OnHighSpeedDetected;
+
         public event EventHandler<BumpEventArgs> OnSlowDownAfterHighSpeed;
 
-		public void StartListeningForBumps()
-		{
-            if(!CrossDeviceMotion.Current.IsActive(MotionSensorType.Accelerometer))
+        public void StartListeningForBumps()
+        {
+            if (!CrossDeviceMotion.Current.IsActive(MotionSensorType.Accelerometer))
             {
                 CrossDeviceMotion.Current.Start(MotionSensorType.Accelerometer, MotionSensorDelay.Game);
                 CrossDeviceMotion.Current.SensorValueChanged += SensorValueChanged;
-                PreviousMotions = new List<MotionType>(AMOUNT_OF_PREVIOUS_MOTIONS);
+                this.previousMotions = new List<MotionType>(AMOUNT_OF_PREVIOUS_MOTIONS);
             }
-		}
+        }
 
-		protected void SensorValueChanged (object sender, SensorValueChangedEventArgs e)
-		{
-			if(e.SensorType == MotionSensorType.Accelerometer)
-			{
-				AccelerometerValueChanged (e.Value as MotionVector);
-			}
-		}
+        protected void SensorValueChanged(object sender, SensorValueChangedEventArgs e)
+        {
+            if (e.SensorType == MotionSensorType.Accelerometer)
+            {
+                AccelerometerValueChanged(e.Value as MotionVector);
+            }
+        }
 
-		protected void AccelerometerValueChanged(MotionVector motion)
-		{
-			currentTime = DateTime.Now;
-			if(hasUpdatedLastValues)
-			{
-				AnalyzeMotion (motion);
-			}
-			else
-			{
-				UpdateLastValues (motion);
-			}
-		}
+        protected void AccelerometerValueChanged(MotionVector motion)
+        {
+            this.currentTime = DateTime.Now;
+            if (this.hasUpdatedLastValues)
+            {
+                AnalyzeMotion(motion);
+            }
+            else
+            {
+                UpdateLastValues(motion);
+            }
+        }
 
-		protected void UpdateLastValues(MotionVector motion)
-		{
-			lastX = motion.X;
-			lastY = motion.Y;
-			lastZ = motion.Z;
-			lastUpdateTime = currentTime;
-            previousMovementDirection = movementDirection;
-            movementDirection = lastX + lastY + lastZ > 0;
-			hasUpdatedLastValues = true;
-		}
+        protected void UpdateLastValues(MotionVector motion)
+        {
+            this.lastX = motion.X;
+            this.lastY = motion.Y;
+            this.lastZ = motion.Z;
+            this.lastUpdateTime = this.currentTime;
+            this.previousMovementDirection = this.movementDirection;
+            this.movementDirection = this.lastX + this.lastY + this.lastZ > 0;
+            this.hasUpdatedLastValues = true;
+        }
 
-		protected void AnalyzeMotion (MotionVector motion)
-		{
-			if (LastUpdateWasLongEnoughAgo ())
-			{
+        protected void AnalyzeMotion(MotionVector motion)
+        {
+            if (LastUpdateWasLongEnoughAgo())
+            {
                 CalculateSpeed(motion);
 
                 DetectMotions();
-					
-				UpdateLastValues (motion);
-			}
-		}
 
-        protected bool LastUpdateWasLongEnoughAgo ()
-        {
-            return (currentTime - lastUpdateTime).TotalMilliseconds > Constants.MINIMUM_DURATION_OF_MOTION;
+                UpdateLastValues(motion);
+            }
         }
-        
+
+        protected bool LastUpdateWasLongEnoughAgo()
+        {
+            return (this.currentTime - this.lastUpdateTime).TotalMilliseconds > Constants.MINIMUM_DURATION_OF_MOTION;
+        }
+
         protected void CalculateSpeed(MotionVector motion)
         {
-            double time = (currentTime - lastUpdateTime).TotalMilliseconds;
-            double distance = motion.X + motion.Y + motion.Z - lastX - lastY - lastZ;
-            lastSpeed = speed;
-            speed = Math.Abs(distance) / time * 10000;
+            double time = (this.currentTime - this.lastUpdateTime).TotalMilliseconds;
+            double distance = motion.X + motion.Y + motion.Z - this.lastX - this.lastY - this.lastZ;
+            this.lastSpeed = this.speed;
+            this.speed = Math.Abs(distance) / time * 10000;
         }
 
         protected void DetectMotions()
         {
-            if(speed > Constants.HIGH_SPEED_THRESHHOLD)
+            if (this.speed > Constants.HIGH_SPEED_THRESHHOLD)
             {
                 RecordHighSpeed();
             }
-            else if(PreviousMotionWasAtHighSpeed())
+            else if (PreviousMotionWasAtHighSpeed())
             {
                 CheckIfBumpHappened();
             }
@@ -114,59 +134,50 @@ namespace BumpDetector
             }
         }
 
-		protected void RecordHighSpeed()
-		{
-            PreviousMotions.AddRespectingCapacity(MotionType.FAST);
-			if(OnHighSpeedDetected != null)
-                OnHighSpeedDetected(this, new BumpEventArgs(){Value = speed});
-		}
+        protected void RecordHighSpeed()
+        {
+            this.previousMotions.AddRespectingCapacity(MotionType.FAST);
+            OnHighSpeedDetected?.Invoke(this, new BumpEventArgs { Value = this.speed });
+        }
 
         protected virtual bool PreviousMotionWasAtHighSpeed()
         {
-            return PreviousMotions.FirstOrDefault () == MotionType.FAST;
+            return this.previousMotions.FirstOrDefault() == MotionType.FAST;
         }
 
-		protected void CheckIfBumpHappened()
-		{
-            if(PreviousMotionsWereAll(MotionType.FAST) && DidAbruptStop())
-			{
+        protected void CheckIfBumpHappened()
+        {
+            if (PreviousMotionsWereAll(MotionType.FAST) && DidAbruptStop())
+            {
                 EndMotion();
-				LaunchBumpEvent ();
-			}
+                LaunchBumpEvent();
+            }
             else
             {
-                if(OnSlowDownAfterHighSpeed != null)
-                        OnSlowDownAfterHighSpeed(this, new BumpEventArgs(){Value = speed});
-                PreviousMotions.AddRespectingCapacity(MotionType.SLOW);
+                OnSlowDownAfterHighSpeed?.Invoke(this, new BumpEventArgs() { Value = this.speed });
+                this.previousMotions.AddRespectingCapacity(MotionType.SLOW);
             }
         }
 
         protected void EndMotion()
         {
-            PreviousMotions.Clear();
-            hasUpdatedLastValues = false;
+            this.previousMotions.Clear();
+            this.hasUpdatedLastValues = false;
         }
-        
+
         protected void LaunchBumpEvent()
         {
-            if (OnBump != null)
-                OnBump (this, new BumpEventArgs(){Value = speed});
+            OnBump?.Invoke(this, new BumpEventArgs() { Value = this.speed });
         }
-        
-        bool PreviousMotionsWereAll(MotionType motion, int numberOfValues = AMOUNT_OF_PREVIOUS_MOTIONS)
-        {
-            return PreviousMotions.Take(numberOfValues).Count(x => x == motion) == numberOfValues;
-        }
-        
-        bool DidAbruptStop()
-        {
-            return speed <= lastSpeed/3;
-        }
-        
-        bool IsMovingInOpositeDirection()
-        {
-            return movementDirection != previousMovementDirection;
-        }
-	}
-}
 
+        private bool PreviousMotionsWereAll(MotionType motion, int numberOfValues = AMOUNT_OF_PREVIOUS_MOTIONS)
+        {
+            return this.previousMotions.Take(numberOfValues).Count(x => x == motion) == numberOfValues;
+        }
+
+        private bool DidAbruptStop()
+        {
+            return this.speed <= this.lastSpeed / 3;
+        }
+    }
+}
