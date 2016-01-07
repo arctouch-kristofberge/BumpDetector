@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Timers;
 
-using Xamarin.Forms;
-
 using Android.App;
+
 using Android.Content;
 using Android.Locations;
-
 using BumpDetector.CustomExceptions;
+
 using BumpDetector.Model;
+using Xamarin.Forms;
 
-[assembly: Dependency(typeof(BumpDetector.Droid.LocationManagerAndroid))]
 
-namespace BumpDetector.Droid
+namespace BumpDetector.Droid.Implementations
 {
     public class LocationManagerAndroid : Activity, ILocationManager, ILocationListener
     {

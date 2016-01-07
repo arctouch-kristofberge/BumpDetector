@@ -75,8 +75,8 @@
     <MtouchUseRefCounting>true</MtouchUseRefCounting>
     <MtouchProfiling>true</MtouchProfiling>
     <CodesignProvision>71fcbeea-da4b-46f0-928a-7f0bfda83f7b</CodesignProvision>
-    <CodesignResourceRules />
-    <CodesignExtraArgs />
+    <CodesignExtraArgs>
+    </CodesignExtraArgs>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.AspNet.SignalR.Client">
@@ -119,6 +119,9 @@
     <Reference Include="DeviceMotion.Plugin">
       <HintPath>..\packages\Xam.Plugin.DeviceMotion.1.0.3\lib\Xamarin.iOS10\DeviceMotion.Plugin.dll</HintPath>
     </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\packages\Portable.Ninject.3.3.1\lib\Xamarin.iOS\Ninject.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BumpDetector\BumpDetector.csproj">
@@ -146,6 +149,8 @@
     <Compile Include="Renderers\BumpWithInfoPageRenderer.cs" />
     <Compile Include="Implementations\LocationManagerIos.cs" />
     <Compile Include="Extensions\LocationExtensions.cs" />
+    <Compile Include="Implementations\BetterBumpListener.cs" />
+    <Compile Include="NinjectModuleiOS.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.2.0.0.6490\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets')" />
@@ -153,8 +158,8 @@
   <ItemGroup />
   <ItemGroup>
     <XamarinComponentReference Include="signalr">
-      <Visible>False</Visible>
       <Version>2.1.2.2</Version>
+      <Visible>False</Visible>
     </XamarinComponentReference>
   </ItemGroup>
 </Project>

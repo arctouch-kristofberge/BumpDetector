@@ -41,15 +41,13 @@ namespace BumpDetector
 
         private const int AMOUNT_OF_PREVIOUS_MOTIONS = 2;
 
-        private bool movementDirection;
-
-        private bool previousMovementDirection;
-
         public event EventHandler<BumpEventArgs> OnBump;
 
         public event EventHandler<BumpEventArgs> OnHighSpeedDetected;
 
         public event EventHandler<BumpEventArgs> OnSlowDownAfterHighSpeed;
+
+        public event EventHandler<BumpEventArgs> OnMovementDetected;
 
         public void StartListeningForBumps()
         {
@@ -88,8 +86,6 @@ namespace BumpDetector
             this.lastY = motion.Y;
             this.lastZ = motion.Z;
             this.lastUpdateTime = this.currentTime;
-            this.previousMovementDirection = this.movementDirection;
-            this.movementDirection = this.lastX + this.lastY + this.lastZ > 0;
             this.hasUpdatedLastValues = true;
         }
 
@@ -97,6 +93,7 @@ namespace BumpDetector
         {
             if (LastUpdateWasLongEnoughAgo())
             {
+                OnMovementDetected?.Invoke(this, new BumpEventArgs{Value = motion.Y});
                 CalculateSpeed(motion);
 
                 DetectMotions();
@@ -150,7 +147,7 @@ namespace BumpDetector
             if (PreviousMotionsWereAll(MotionType.FAST) && DidAbruptStop())
             {
                 EndMotion();
-                LaunchBumpEvent();
+                OnBump?.Invoke(this, new BumpEventArgs() { Value = this.speed });
             }
             else
             {
@@ -163,11 +160,6 @@ namespace BumpDetector
         {
             this.previousMotions.Clear();
             this.hasUpdatedLastValues = false;
-        }
-
-        protected void LaunchBumpEvent()
-        {
-            OnBump?.Invoke(this, new BumpEventArgs() { Value = this.speed });
         }
 
         private bool PreviousMotionsWereAll(MotionType motion, int numberOfValues = AMOUNT_OF_PREVIOUS_MOTIONS)

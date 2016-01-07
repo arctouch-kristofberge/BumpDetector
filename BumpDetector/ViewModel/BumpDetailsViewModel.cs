@@ -26,16 +26,23 @@ namespace BumpDetector.ViewModel
 
 		public void StartBumping()
 		{
-            BumpListener.OnBump -= BumpDetected;
-            BumpListener.OnBump += BumpDetected;
-            BumpListener.OnHighSpeedDetected -= HighSpeedDetected;
-            BumpListener.OnHighSpeedDetected += HighSpeedDetected;
-            BumpListener.OnSlowDownAfterHighSpeed -= SlowDownAfterHighSpeed;
-            BumpListener.OnSlowDownAfterHighSpeed += SlowDownAfterHighSpeed;
+            BumpListener.OnMovementDetected -= MovementDetected;
+            BumpListener.OnMovementDetected += MovementDetected;
+//            BumpListener.OnBump -= BumpDetected;
+//            BumpListener.OnBump += BumpDetected;
+//            BumpListener.OnHighSpeedDetected -= HighSpeedDetected;
+//            BumpListener.OnHighSpeedDetected += HighSpeedDetected;
+//            BumpListener.OnSlowDownAfterHighSpeed -= SlowDownAfterHighSpeed;
+//            BumpListener.OnSlowDownAfterHighSpeed += SlowDownAfterHighSpeed;
 			BumpListener.StartListeningForBumps ();
 		}
 
-        void SlowDownAfterHighSpeed (object sender, BumpEventArgs e)
+        private void MovementDetected(object sender, BumpEventArgs e)
+        {
+            SpeedList.Children.Add(new Label{Text = "y: " + e.Value});
+        }
+
+        private void SlowDownAfterHighSpeed (object sender, BumpEventArgs e)
         {
             SpeedList.Children.Add(new Label(){ Text = "Slow down " + e.Value });
         }
@@ -45,7 +52,7 @@ namespace BumpDetector.ViewModel
 			BumpsStatus = "Bumps detected: " + bumpsDetected;
 		}
 
-        void HighSpeedDetected (object sender, BumpEventArgs e)
+        private void HighSpeedDetected (object sender, BumpEventArgs e)
 		{
             SpeedList.Children.Add(new Label(){ Text = "High speed " + e.Value });
 		}
@@ -62,7 +69,7 @@ namespace BumpDetector.ViewModel
             }
 		}
 
-        bool PreviousBumpHappenedLongEnoughAgo()
+        private bool PreviousBumpHappenedLongEnoughAgo()
         {
             return newBumpTimestamp - previousBumpTimestamp > Constants.TIME_BETWEEN_BUMPS;
         }
