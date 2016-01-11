@@ -36,7 +36,6 @@ namespace BumpDetector
             LocationManager = DependencyService.Get<ILocationManager>();
             BumpListener = new BumpListener();
             MainPage = new NavigationPage(new MainPage());
-            new WebView().
         }
 
         public ILocationManager LocationManager { get; set; }

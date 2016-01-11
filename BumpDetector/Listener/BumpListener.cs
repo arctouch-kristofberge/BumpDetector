@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using BumpDetector.Shared;
+using System;
+using BumpDetector.Listener;
 
 namespace BumpDetector
 {
@@ -49,44 +51,18 @@ namespace BumpDetector
 
         public event EventHandler<BumpEventArgs> OnMovementDetected;
 
+        private AveragedAccelerometer accelerometer;
+
         public void StartListeningForBumps()
         {
-            if (!CrossDeviceMotion.Current.IsActive(MotionSensorType.Accelerometer))
-            {
-                CrossDeviceMotion.Current.Start(MotionSensorType.Accelerometer, MotionSensorDelay.Game);
-                CrossDeviceMotion.Current.SensorValueChanged += SensorValueChanged;
-                this.previousMotions = new List<MotionType>(AMOUNT_OF_PREVIOUS_MOTIONS);
-            }
+            accelerometer = new AveragedAccelerometer();
+            accelerometer.OnValueChanged += AccelerometerValueChanged;
         }
 
-        protected void SensorValueChanged(object sender, SensorValueChangedEventArgs e)
+        protected void AccelerometerValueChanged(object sender, AcceleratorMotionEventArgs e)
         {
-            if (e.SensorType == MotionSensorType.Accelerometer)
-            {
-                AccelerometerValueChanged(e.Value as MotionVector);
-            }
-        }
-
-        protected void AccelerometerValueChanged(MotionVector motion)
-        {
-            this.currentTime = DateTime.Now;
-            if (this.hasUpdatedLastValues)
-            {
-                AnalyzeMotion(motion);
-            }
-            else
-            {
-                UpdateLastValues(motion);
-            }
-        }
-
-        protected void UpdateLastValues(MotionVector motion)
-        {
-            this.lastX = motion.X;
-            this.lastY = motion.Y;
-            this.lastZ = motion.Z;
-            this.lastUpdateTime = this.currentTime;
-            this.hasUpdatedLastValues = true;
+            MotionVector motion = e.Value;
+            AnalyzeMotion(motion);
         }
 
         protected void AnalyzeMotion(MotionVector motion)

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using DeviceMotion.Plugin.Abstractions;
+using System.Linq;
 
 namespace BumpDetector
 {
@@ -13,6 +15,16 @@ namespace BumpDetector
             }
 
             list.Insert(index, item);
+        }
+
+        public static MotionVector CalculateAverage(this List<MotionVector> list)
+        {
+            return new MotionVector { 
+                Value = list.Average(x => x.Value),
+                X = list.Average(x => x.X),
+                Y = list.Average(x => x.Y),
+                Z = list.Average(x => x.Z)
+            };
         }
     }
 }
